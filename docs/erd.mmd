@@ -1,0 +1,222 @@
+erDiagram
+    users {
+        int id PK
+        string name
+        string email UK
+        string password
+        text bio
+        string profile_photo
+        json allergens
+        json ingredient_preferences
+        boolean is_admin "default false"
+        datetime email_verified_at
+    }
+
+    recipes {
+        int id PK
+        int user_id FK
+        string title
+        text description
+        int cooking_time
+        enum difficulty
+        int servings
+        string photo
+        json preparation_steps
+        enum visibility "private-public"
+        enum status "draft-pending-approved-rejected-rejected_photo"
+        text admin_feedback
+        int approved_by_admin_id FK
+        datetime approved_at
+        datetime deleted_at
+        int views_count "default 0"
+    }
+
+    recipe_views {
+        int id PK
+        int recipe_id FK
+        int user_id FK "nullable"
+        string ip_address
+        datetime viewed_at
+    }
+
+    shopping_lists {
+        int id PK
+        int user_id FK
+        string name
+        date created_for_date "nullable"
+        datetime created_at
+    }
+
+    shopping_list_items {
+        int id PK
+        int shopping_list_id FK
+        int ingredient_id FK
+        int recipe_id FK "nullable"
+        decimal amount
+        string unit
+        boolean is_checked "default false"
+        int sort_order
+    }
+
+    ingredients {
+        int id PK
+        string name UK
+        string name_plural
+        enum category "groente-fruit-vlees-zuivel-etc"
+        json allergens
+        enum status "approved-pending"
+        int suggested_by_user_id FK
+        int approved_by_admin_id FK
+    }
+
+    recipe_ingredients {
+        int id PK
+        int recipe_id FK
+        int ingredient_id FK
+        decimal amount
+        string unit
+    }
+
+    tags {
+        int id PK
+        string name UK
+        enum type "ingredient-category"
+        enum category "keuken-maaltijd-dieet-seizoen-etc"
+    }
+
+    recipe_tags {
+        int id PK
+        int recipe_id FK
+        int tag_id FK
+    }
+
+    likes {
+        int id PK
+        int user_id FK
+        int recipe_id FK
+        enum type "like-dislike"
+        unique user_recipe "user_id+recipe_id"
+    }
+
+    favorites {
+        int id PK
+        int user_id FK
+        int recipe_id FK
+        unique user_recipe "user_id+recipe_id"
+    }
+
+    lists {
+        int id PK
+        int user_id FK
+        string name
+        text description
+    }
+
+    list_recipes {
+        int id PK
+        int list_id FK
+        int recipe_id FK
+    }
+
+    follows {
+        int id PK
+        int follower_id FK
+        int following_id FK
+        unique follower_following "follower_id+following_id"
+        check no_self_follow "follower_id != following_id"
+    }
+
+    reports {
+        int id PK
+        int user_id FK
+        int recipe_id FK
+        text reason
+        enum status "pending-reviewed-actioned"
+        text admin_notes
+        int reviewed_by_admin_id FK
+    }
+
+    bans {
+        int id PK
+        int user_id FK
+        int banned_by_admin_id FK
+        text reason
+    }
+
+    recipe_ai_analysis {
+        int id PK
+        int recipe_id FK
+        int photo_score
+        int text_completeness_score
+        int ingredient_logic_score
+        enum overall_recommendation
+        json analysis_data
+    }
+
+    users ||--o{ recipes : creates
+    users ||--o{ shopping_lists : owns
+    users ||--o{ recipe_views : tracks
+    users ||--o{ follows : "is_follower"
+    users ||--o{ follows : "is_following"
+    users ||--o{ likes : gives
+    users ||--o{ favorites : adds
+    users ||--o{ lists : owns
+    users ||--o{ reports : submits
+    users ||--o| bans : receives
+    users ||--o{ ingredients : suggests
+
+    recipes }o--|| users : "owned_by"
+    recipes ||--o{ recipe_ingredients : contains
+    recipes ||--o{ recipe_tags : has
+    recipes ||--o{ recipe_views : tracked
+    recipes ||--o{ shopping_list_items : "referenced_in"
+    recipes ||--o{ likes : receives
+    recipes ||--o{ favorites : "favorited_in"
+    recipes ||--o{ list_recipes : "included_in"
+    recipes ||--o{ reports : "reported_in"
+    recipes ||--o| recipe_ai_analysis : "analyzed_by"
+
+    shopping_lists ||--o{ shopping_list_items : contains
+    shopping_list_items }o--|| shopping_lists : "belongs_to"
+    shopping_list_items }o--|| ingredients : includes
+    shopping_list_items }o--o| recipes : "from_recipe"
+
+    ingredients ||--o{ recipe_ingredients : "used_in"
+    ingredients ||--o{ shopping_list_items : "added_to"
+    ingredients }o--o| users : "suggested_by"
+    ingredients }o--o| users : "approved_by_admin"
+
+    tags ||--o{ recipe_tags : "applied_to"
+
+    lists ||--o{ list_recipes : contains
+    list_recipes }o--|| lists : "belongs_to"
+    list_recipes }o--|| recipes : includes
+
+    recipe_ingredients }o--|| recipes : "part_of"
+    recipe_ingredients }o--|| ingredients : uses
+
+    recipe_tags }o--|| recipes : "tags"
+    recipe_tags }o--|| tags : "tagged_with"
+
+    likes }o--|| users : "given_by"
+    likes }o--|| recipes : "for_recipe"
+
+    favorites }o--|| users : "favorited_by"
+    favorites }o--|| recipes : "favorited_recipe"
+
+    follows }o--|| users : "follower"
+    follows }o--|| users : "following"
+
+    reports }o--|| users : "reported_by"
+    reports }o--|| recipes : "about_recipe"
+    reports }o--o| users : "reviewed_by_admin"
+
+    bans }o--|| users : "banned_user"
+    bans }o--|| users : "banned_by_admin"
+
+    recipe_ai_analysis }o--|| recipes : "analyzes"
+
+    recipes }o--o| users : "approved_by_admin"
+
+    recipe_views }o--|| recipes : "views"
+    recipe_views }o--o| users : "viewed_by"
