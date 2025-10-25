@@ -1,6 +1,12 @@
 erDiagram
     USERS ||--o{ SESSIONS : "has"
     USERS ||--o{ PASSWORD_RESET_TOKENS : "requests"
+    USERS ||--o{ RECIPES : "owns"
+    USERS ||--o{ LIKES : "creates"
+    USERS ||--o{ USER_SAVED_RECIPES : "saves"
+    RECIPES ||--o{ INGREDIENTS : "contains"
+    RECIPES ||--o{ LIKES : "receives"
+    RECIPES ||--o{ USER_SAVED_RECIPES : "saved by"
 
     USERS {
         bigint id PK
@@ -27,4 +33,51 @@ erDiagram
         text user_agent
         longtext payload
         integer last_activity
+    }
+
+    RECIPES {
+        bigint id PK
+        bigint user_id FK
+        string title
+        text description
+        string photo_path "nullable"
+        integer cook_time "in minutes"
+        enum difficulty "easy, medium, hard - default: medium"
+        integer servings "default: 1"
+        string cuisine_type "nullable"
+        string category "nullable"
+        json dietary_tags "nullable - vegetarian, gluten-free, etc"
+        enum status "private, pending, approved, rejected - default: private"
+        text rejection_reason "nullable"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "soft deletes"
+    }
+
+    INGREDIENTS {
+        bigint id PK
+        bigint recipe_id FK
+        string name
+        decimal amount "8,2"
+        string unit "g, ml, cups, tbsp, etc"
+        integer order "default: 0"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    LIKES {
+        bigint id PK
+        bigint user_id FK
+        bigint likeable_id "polymorphic"
+        string likeable_type "polymorphic"
+        boolean is_like "true=like, false=dislike"
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    USER_SAVED_RECIPES {
+        bigint user_id FK
+        bigint recipe_id FK
+        timestamp created_at
+        timestamp updated_at
     }

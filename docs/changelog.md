@@ -24,7 +24,13 @@ Hier houd ik bij wat ik heb gedaan tijdens het project.
 ## Week 2 - 20 oktober 2025
 
 ### Wat ik heb gedaan
--
+- **25 oktober**: Database fundament voor receptenbeheer systeem
+  - Recipe model met status workflow (private, pending, approved, rejected)
+  - Ingredient model met recipe relaties en volgorde
+  - Polymorfisch like systeem voor recepten (like/dislike functionaliteit)
+  - User-recipe relaties (eigenaarschap, opgeslagen recepten)
+  - Uitgebreide model factories voor testing
+  - 14 geautomatiseerde unit tests voor models en relaties
 
 
 ## Week 3 - 27 oktober 2025
