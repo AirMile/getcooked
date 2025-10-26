@@ -131,29 +131,31 @@ class Recipe extends Model
     {
         return Attribute::make(
             get: function () {
-                $totalLikes = $this->likes()->count();
+                // Use withCount aggregates if loaded, otherwise fall back to queries
+                $totalLikes = $this->likes_count ?? $this->likes()->count();
                 if ($totalLikes === 0) {
                     return 0;
                 }
 
-                $likes = $this->likes()->where('is_like', true)->count();
+                $likes = $this->likes_like_count ?? $this->likes()->where('is_like', true)->count();
                 return round(($likes / $totalLikes) * 100, 1);
             }
-        );
+        )->shouldCache();
     }
 
     protected function dislikePercentage(): Attribute
     {
         return Attribute::make(
             get: function () {
-                $totalLikes = $this->likes()->count();
+                // Use withCount aggregates if loaded, otherwise fall back to queries
+                $totalLikes = $this->likes_count ?? $this->likes()->count();
                 if ($totalLikes === 0) {
                     return 0;
                 }
 
-                $dislikes = $this->likes()->where('is_like', false)->count();
+                $dislikes = $this->likes_dislike_count ?? $this->likes()->where('is_like', false)->count();
                 return round(($dislikes / $totalLikes) * 100, 1);
             }
-        );
+        )->shouldCache();
     }
 }

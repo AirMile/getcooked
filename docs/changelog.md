@@ -27,16 +27,24 @@ Hier houd ik bij wat ik heb gedaan tijdens het project.
 - **25 oktober**: Database fundament voor receptenbeheer systeem
   - Recipe model met status workflow (private, pending, approved, rejected)
   - Ingredient model met recipe relaties en volgorde
-  - Polymorfisch like systeem voor recepten (like/dislike functionaliteit)
+  - Like systeem voor recepten (like/dislike functionaliteit)
   - User-recipe relaties (eigenaarschap, opgeslagen recepten)
   - Uitgebreide model factories voor testing
   - 14 geautomatiseerde unit tests voor models en relaties
-
+- **26 oktober**: Navigatie systeem en dashboard transformatie
+    - Role-based navigatie met aparte user en admin componenten
+    - User navigatie: Public Recipes, My Recipes, Create Recipe, Saved Recipes
+    - Admin navigatie: Pending Recipes, Public Recipes moderation, Users Management
+    - Search bar component (placeholder voor toekomstige zoekfunctie)
+    - Dashboard omgebouwd naar public recipes browse view met paginatie
+    - Recipe cards met foto, metadata en like/dislike ratios
+    - Mobile-responsive navigatie met Alpine.js toggle functionaliteit
 
 ## Week 3 - 27 oktober 2025
 
 ### Wat ik heb gedaan
--
+
+
 
 
 ---

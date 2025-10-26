@@ -26,7 +26,17 @@ Route::get('/', function () {
 */
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    $recipes = \App\Models\Recipe::public()
+        ->with('user')
+        ->withCount([
+            'likes as likes_count',
+            'likes as likes_like_count' => fn($query) => $query->where('is_like', true),
+            'likes as likes_dislike_count' => fn($query) => $query->where('is_like', false),
+        ])
+        ->orderBy('created_at', 'desc')
+        ->paginate(15);
+
+    return view('dashboard', ['recipes' => $recipes]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -43,26 +53,28 @@ Route::middleware('auth')->group(function () {
     Route::post('recipes/{recipe}/withdraw', [RecipeController::class, 'withdraw'])
         ->name('recipes.withdraw');
 
-    // Social features
-    Route::post('recipes/{recipe}/like', [RecipeController::class, 'like'])
-        ->name('recipes.like');
-    Route::post('recipes/{recipe}/dislike', [RecipeController::class, 'dislike'])
-        ->name('recipes.dislike');
-    Route::post('recipes/{recipe}/save', [RecipeController::class, 'save'])
-        ->name('recipes.save');
-    Route::delete('recipes/{recipe}/unsave', [RecipeController::class, 'unsave'])
-        ->name('recipes.unsave');
+    // Social features (with rate limiting)
+    Route::middleware('throttle:recipe-interactions')->group(function () {
+        Route::post('recipes/{recipe}/like', [RecipeController::class, 'like'])
+            ->name('recipes.like');
+        Route::post('recipes/{recipe}/dislike', [RecipeController::class, 'dislike'])
+            ->name('recipes.dislike');
+        Route::post('recipes/{recipe}/save', [RecipeController::class, 'save'])
+            ->name('recipes.save');
+        Route::delete('recipes/{recipe}/unsave', [RecipeController::class, 'unsave'])
+            ->name('recipes.unsave');
+    });
 });
 
 /*
 |--------------------------------------------------------------------------
 | Admin Routes
 |--------------------------------------------------------------------------
-| Admin moderation and management routes. Protected by auth middleware
-| with additional role check in AdminRecipeController constructor.
+| Admin moderation and management routes. Protected by auth and admin
+| middleware.
 */
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     // Pending recipes
     Route::get('recipes/pending', [AdminRecipeController::class, 'pending'])
         ->name('recipes.pending');

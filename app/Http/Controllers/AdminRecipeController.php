@@ -10,21 +10,10 @@ use Illuminate\Support\Facades\Storage;
 class AdminRecipeController extends Controller
 {
     /**
-     * Ensure user is admin.
-     */
-    private function ensureAdmin(): void
-    {
-        if (auth()->user()?->role !== 'admin') {
-            abort(403, 'Unauthorized action.');
-        }
-    }
-
-    /**
      * Display pending recipes dashboard.
      */
     public function pending(Request $request)
     {
-        $this->ensureAdmin();
         $query = Recipe::pending()
             ->with(['user', 'ingredients']);
 
@@ -59,7 +48,6 @@ class AdminRecipeController extends Controller
      */
     public function approve(Recipe $recipe)
     {
-        $this->ensureAdmin();
         $this->authorize('approve', $recipe);
 
         if ($recipe->approve()) {
@@ -74,7 +62,6 @@ class AdminRecipeController extends Controller
      */
     public function reject(Request $request, Recipe $recipe)
     {
-        $this->ensureAdmin();
         $this->authorize('reject', $recipe);
 
         $validated = $request->validate([
@@ -93,8 +80,6 @@ class AdminRecipeController extends Controller
      */
     public function public(Request $request)
     {
-        $this->ensureAdmin();
-
         $query = Recipe::approved()
             ->with(['user', 'likes']);
 
@@ -123,7 +108,6 @@ class AdminRecipeController extends Controller
      */
     public function moderate(Request $request, Recipe $recipe)
     {
-        $this->ensureAdmin();
         $this->authorize('delete', $recipe);
 
         $validated = $request->validate([
@@ -149,27 +133,12 @@ class AdminRecipeController extends Controller
      */
     public function users()
     {
-        $this->ensureAdmin();
+        $users = User::has('recipes')
+            ->withCount('recipes')
+            ->orderByDesc('recipes_count')
+            ->paginate(20);
 
-        $users = User::withCount('recipes')
-            ->get()
-            ->filter(fn($user) => $user->recipes_count > 0)
-            ->sortByDesc('recipes_count');
-
-        // Manual pagination
-        $perPage = 20;
-        $currentPage = request()->get('page', 1);
-        $items = $users->forPage($currentPage, $perPage);
-
-        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
-            $items,
-            $users->count(),
-            $perPage,
-            $currentPage,
-            ['path' => request()->url(), 'query' => request()->query()]
-        );
-
-        return view('admin.users.index', ['users' => $paginator]);
+        return view('admin.users.index', ['users' => $users]);
     }
 
     /**
@@ -177,8 +146,6 @@ class AdminRecipeController extends Controller
      */
     public function userRecipes(User $user)
     {
-        $this->ensureAdmin();
-
         $recipes = $user->recipes()
             ->with('ingredients')
             ->latest()

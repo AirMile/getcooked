@@ -1,6 +1,6 @@
 # Project Architecture - GetCooked
 
-Last updated: 2025-10-25
+Last updated: 2025-10-26
 
 ## Overview
 
@@ -38,7 +38,17 @@ getcooked/
 │       ├── [timestamp]_create_likes_table.php
 │       └── [timestamp]_create_user_saved_recipes_table.php
 ├── resources/
-│   └── views/                 # Blade templates
+│   └── views/
+│       ├── components/
+│       │   ├── nav/           # Navigation components
+│       │   │   ├── user.blade.php
+│       │   │   ├── admin.blade.php
+│       │   │   └── search-bar.blade.php
+│       │   └── *.blade.php    # Other Blade components
+│       ├── layouts/
+│       │   ├── app.blade.php  # Main application layout
+│       │   └── navigation.blade.php  # Role-based navigation wrapper
+│       └── dashboard.blade.php  # Public recipes browse view
 ├── routes/
 │   └── web.php                # Web routes
 └── tests/
@@ -153,6 +163,75 @@ graph TD
     E -->|user submits| F
     H -->|user resubmits| F
 ```
+
+## View Layer & Navigation
+
+### Navigation System
+
+```mermaid
+graph TD
+    A[layouts/navigation.blade.php] -->|role check| B{User Role?}
+    B -->|admin| C[nav/admin.blade.php]
+    B -->|user| D[nav/user.blade.php]
+    C --> E[nav/search-bar.blade.php]
+    D --> E
+
+    C -->|includes| F[Admin Navigation Items]
+    D -->|includes| G[User Navigation Items]
+
+    F --> F1[Pending Recipes]
+    F --> F2[Public Recipes Moderation]
+    F --> F3[Users Management]
+    F --> F4[Dashboard]
+
+    G --> G1[Public Recipes]
+    G --> G2[My Recipes]
+    G --> G3[Create Recipe]
+    G --> G4[Saved Recipes]
+```
+
+**Role-Based Navigation:**
+- `layouts/navigation.blade.php` checks user role via `Auth::user()?->role === 'admin'`
+- Conditionally renders `<x-nav.admin />` or `<x-nav.user />`
+- Both components maintain identical styling and structure
+- Alpine.js handles mobile menu toggling
+- Responsive design: horizontal navigation (desktop), hamburger menu (mobile)
+
+**Navigation Components:**
+- `nav/user.blade.php` - Regular user navigation with recipe management links
+- `nav/admin.blade.php` - Admin navigation with moderation and management links
+- `nav/search-bar.blade.php` - Placeholder search component (disabled, awaiting implementation)
+
+### Dashboard Browse View
+
+The dashboard serves as the main landing page for authenticated users, displaying a paginated grid of public recipes.
+
+**Route:** `/dashboard`
+**Query:**
+```php
+Recipe::public()
+    ->with(['user', 'likes'])
+    ->withCount([
+        'likes as likes_like_count' => fn($query) => $query->where('is_like', true),
+        'likes as likes_dislike_count' => fn($query) => $query->where('is_like', false),
+    ])
+    ->orderBy('created_at', 'desc')
+    ->paginate(15);
+```
+
+**Features:**
+- Displays only approved recipes (`status = 'approved'`)
+- Responsive grid layout (1 column mobile, 2 tablet, 3 desktop)
+- Recipe cards with photo/placeholder, metadata, like/dislike ratios
+- Pagination (15 recipes per page)
+- Empty state with call-to-action when no public recipes exist
+- Eager loading prevents N+1 queries
+
+**Performance Optimization:**
+- Eager loads `user` and `likes` relationships
+- Pre-calculates like/dislike counts at database level via `withCount`
+- Recipe model accessors use pre-calculated aggregates when available
+- Single query for pagination count
 
 ## Business Logic
 
@@ -273,11 +352,26 @@ stateDiagram-v2
 - Edge cases covered (division by zero, cascade deletes)
 - Scopes and accessors validated
 
+### Feature Tests (19 tests)
+- Navigation rendering for different user roles
+- Dashboard browse functionality
+- Recipe card display and pagination
+- Empty state handling
+- Role-based access control
+
 ### Test Files
+**Unit Tests:**
 - `tests/Unit/Models/RecipeTest.php` - Recipe model tests
 - `tests/Unit/Models/IngredientTest.php` - Ingredient model tests
 - `tests/Unit/Models/LikeTest.php` - Like model tests
 - `tests/Unit/Models/UserRecipeRelationshipsTest.php` - User relationships
+
+**Feature Tests:**
+- `tests/Feature/NavigationTest.php` - Navigation rendering tests (8 tests)
+- `tests/Feature/DashboardBrowseTest.php` - Dashboard functionality tests (11 tests)
+- `tests/Feature/RecipeManagementTest.php` - Recipe CRUD tests
+- `tests/Feature/RecipePolicyTest.php` - Authorization tests
+- `tests/Feature/AdminRecipeManagementTest.php` - Admin workflow tests
 
 ## Next Steps
 

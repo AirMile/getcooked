@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Recipe;
 use App\Models\Like;
+use App\Http\Requests\StoreRecipeRequest;
+use App\Http\Requests\UpdateRecipeRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rules\File;
-use Illuminate\Validation\Rule;
 
 class RecipeController extends Controller
 {
@@ -20,14 +20,24 @@ class RecipeController extends Controller
 
         // User's own recipes (all statuses)
         $myRecipes = Recipe::where('user_id', $user->id)
-            ->with(['ingredients', 'likes'])
+            ->with(['ingredients'])
+            ->withCount([
+                'likes',
+                'likes as likes_like_count' => fn($q) => $q->where('is_like', true),
+                'likes as likes_dislike_count' => fn($q) => $q->where('is_like', false)
+            ])
             ->latest()
             ->get();
 
         // Public approved recipes
         $publicRecipes = Recipe::approved()
             ->where('user_id', '!=', $user->id)
-            ->with(['user', 'ingredients', 'likes'])
+            ->with(['user', 'ingredients'])
+            ->withCount([
+                'likes',
+                'likes as likes_like_count' => fn($q) => $q->where('is_like', true),
+                'likes as likes_dislike_count' => fn($q) => $q->where('is_like', false)
+            ])
             ->latest()
             ->paginate(12);
 
@@ -47,26 +57,9 @@ class RecipeController extends Controller
     /**
      * Store a newly created recipe.
      */
-    public function store(Request $request)
+    public function store(StoreRecipeRequest $request)
     {
-        $this->authorize('create', Recipe::class);
-
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'photo' => ['nullable', File::image()->max(5 * 1024), Rule::dimensions()->maxWidth(2000)->maxHeight(2000)],
-            'cook_time' => 'required|integer|min:1',
-            'difficulty' => 'required|in:easy,medium,hard',
-            'servings' => 'required|integer|min:1',
-            'cuisine_type' => 'nullable|string|max:100',
-            'category' => 'nullable|string|max:100',
-            'dietary_tags' => 'nullable|array',
-            'dietary_tags.*' => 'string|in:vegetarian,vegan,pescatarian,keto,paleo,gluten-free,dairy-free,nut-free,egg-free,soy-free,shellfish-free,fish-free',
-            'ingredients' => 'required|array|min:1',
-            'ingredients.*.name' => 'required|string|max:255',
-            'ingredients.*.amount' => 'required|numeric|min:0',
-            'ingredients.*.unit' => 'required|string|max:50',
-        ]);
+        $validated = $request->validated();
 
         // Handle photo upload
         $photoPath = null;
@@ -140,26 +133,9 @@ class RecipeController extends Controller
     /**
      * Update the specified recipe.
      */
-    public function update(Request $request, Recipe $recipe)
+    public function update(UpdateRecipeRequest $request, Recipe $recipe)
     {
-        $this->authorize('update', $recipe);
-
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'photo' => ['nullable', File::image()->max(5 * 1024), Rule::dimensions()->maxWidth(2000)->maxHeight(2000)],
-            'cook_time' => 'required|integer|min:1',
-            'difficulty' => 'required|in:easy,medium,hard',
-            'servings' => 'required|integer|min:1',
-            'cuisine_type' => 'nullable|string|max:100',
-            'category' => 'nullable|string|max:100',
-            'dietary_tags' => 'nullable|array',
-            'dietary_tags.*' => 'string|in:vegetarian,vegan,pescatarian,keto,paleo,gluten-free,dairy-free,nut-free,egg-free,soy-free,shellfish-free,fish-free',
-            'ingredients' => 'required|array|min:1',
-            'ingredients.*.name' => 'required|string|max:255',
-            'ingredients.*.amount' => 'required|numeric|min:0',
-            'ingredients.*.unit' => 'required|string|max:50',
-        ]);
+        $validated = $request->validated();
 
         // Handle photo upload
         $photoPath = $recipe->photo_path;
