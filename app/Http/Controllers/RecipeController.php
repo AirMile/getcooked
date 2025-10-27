@@ -160,9 +160,12 @@ class RecipeController extends Controller
             'dietary_tags' => $validated['dietary_tags'] ?? [],
         ]);
 
-        // If approved recipe is edited by user, change status to pending
+        // If approved recipe is edited by non-admin user
+        // Verified users keep approved status, standard users go to pending
         if ($recipe->status === 'approved' && $request->user()->role !== 'admin') {
-            $recipe->update(['status' => 'pending']);
+            if (!$request->user()->is_verified) {
+                $recipe->update(['status' => 'pending']);
+            }
         }
 
         // Update ingredients (delete old, create new)

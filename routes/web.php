@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminRecipeController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RecipeController;
 use Illuminate\Support\Facades\Route;
@@ -94,6 +95,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         ->name('users.index');
     Route::get('users/{user}/recipes', [AdminRecipeController::class, 'userRecipes'])
         ->name('users.recipes');
+
+    // User verified status toggle
+    Route::post('users/{user}/toggle-verified', [AdminUserController::class, 'toggleVerified'])
+        ->name('users.toggle-verified');
+
+    // Recipe privacy toggle
+    Route::post('recipes/{recipe}/toggle-privacy', [AdminUserController::class, 'toggleRecipePrivacy'])
+        ->name('recipes.toggle-privacy');
 });
 
 require __DIR__.'/auth.php';

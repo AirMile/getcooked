@@ -90,7 +90,13 @@ class Recipe extends Model
             return false;
         }
 
-        $this->status = 'pending';
+        // Verified users bypass pending approval
+        if ($this->user->is_verified) {
+            $this->status = 'approved';
+        } else {
+            $this->status = 'pending';
+        }
+
         $this->rejection_reason = null;
         return $this->save();
     }

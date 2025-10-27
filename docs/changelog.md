@@ -43,7 +43,14 @@ Hier houd ik bij wat ik heb gedaan tijdens het project.
 ## Week 3 - 27 oktober 2025
 
 ### Wat ik heb gedaan
-
+- **27 oktober**: Geverifieerde gebruikers systeem met toggle functionaliteit
+    - Admin kan gebruikers verifiëren via slider op /admin/users pagina
+    - Admin kan recept privacy (privé <-> goedgekeurd) aanpassen via slider op /admin/users/{id}/recipes pagina
+    - Geverifieerd badge (blauw vinkje icoon) wordt getoond naast recept auteurs op publieke pagina's
+    - Geverifieerde gebruikers slaan goedkeuringsproces over bij het publiceren van recepten
+    - Standaard gebruikers hebben admin goedkeuring nodig voor publieke recepten
+    - Aparte POST controller acties voor elke toggle
+    - Alpine.js Ajax sliders met error handling en slider terugdraai functie bij fouten
 
 
 

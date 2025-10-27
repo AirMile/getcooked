@@ -51,7 +51,10 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($recipes as $recipe)
-                                <tr>
+                                <tr x-data="{
+                                    isPrivate: {{ in_array($recipe->status, ['private']) ? 'true' : 'false' }},
+                                    canToggle: {{ in_array($recipe->status, ['private', 'approved']) ? 'true' : 'false' }}
+                                }">
                                     <td class="px-6 py-4">
                                         <div class="flex items-center">
                                             @if($recipe->photo_path)
@@ -65,13 +68,24 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                            {{ $recipe->status === 'approved' ? 'bg-green-100 text-green-800' : '' }}
-                                            {{ $recipe->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : '' }}
-                                            {{ $recipe->status === 'rejected' ? 'bg-red-100 text-red-800' : '' }}
-                                            {{ $recipe->status === 'private' ? 'bg-gray-100 text-gray-800' : '' }}">
-                                            {{ ucfirst($recipe->status) }}
-                                        </span>
+                                        <div class="flex items-center gap-2">
+                                            <template x-if="canToggle">
+                                                <button
+                                                    type="button"
+                                                    @click="$el.blur(); isPrivate = !isPrivate; fetch('{{ route('admin.recipes.toggle-privacy', $recipe) }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content } }).then(r => r.ok ? r.text().then(html => document.getElementById('recipe-status-badge-{{ $recipe->id }}').innerHTML = html) : (isPrivate = !isPrivate))"
+                                                    :class="!isPrivate ? 'bg-green-600' : 'bg-gray-300'"
+                                                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                                                    role="switch"
+                                                    :aria-checked="!isPrivate">
+                                                    <span
+                                                        :class="!isPrivate ? 'translate-x-5' : 'translate-x-0'"
+                                                        class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                                                </button>
+                                            </template>
+                                            <span id="recipe-status-badge-{{ $recipe->id }}">
+                                                @include('admin.partials.recipe-status-badge', ['status' => $recipe->status])
+                                            </span>
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-500">
                                         {{ $recipe->ingredients->count() }} ingredients
