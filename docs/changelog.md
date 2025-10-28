@@ -51,7 +51,12 @@ Hier houd ik bij wat ik heb gedaan tijdens het project.
     - Standaard gebruikers hebben admin goedkeuring nodig voor publieke recepten
     - Aparte POST controller acties voor elke toggle
     - Alpine.js Ajax sliders met error handling en slider terugdraai functie bij fouten
-
+- **28 oktober**: Spam preventie systeem
+    - Spam preventie voor nieuwe gebruikers: maximaal 1 pending recept totdat eerste recept is goedgekeurd
+    - Custom Laravel validatie regel voor spam preventie tijdens recept indienen
+    - Gebruikers worden permanent ontgrendeld na eerste goedgekeurd recept
+    - Afgekeurde recepten tellen niet mee, gebruiker kan direct nieuw recept uploaden
+    - Geverifieerde gebruikers omzeilen alle spam preventie beperkingen
 
 
 ---
@@ -59,6 +64,6 @@ Hier houd ik bij wat ik heb gedaan tijdens het project.
 ## Week 4 - 3 november 2025 (Deadline: 10 november)
 
 ### Wat ik heb gedaan
--
+
 
 ---

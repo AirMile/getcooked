@@ -6,6 +6,7 @@ use App\Models\Recipe;
 use App\Models\Like;
 use App\Http\Requests\StoreRecipeRequest;
 use App\Http\Requests\UpdateRecipeRequest;
+use App\Rules\HasApprovedRecipeOrNoPendingRecipe;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -204,9 +205,17 @@ class RecipeController extends Controller
     /**
      * Submit recipe for approval.
      */
-    public function submit(Recipe $recipe)
+    public function submit(Request $request, Recipe $recipe)
     {
         $this->authorize('submitForApproval', $recipe);
+
+        // Validate spam prevention (only for non-verified users)
+        if (!$request->user()->is_verified) {
+            $request->merge(['spam_check' => 'check']); // Add dummy value for validation
+            $request->validate([
+                'spam_check' => [new HasApprovedRecipeOrNoPendingRecipe],
+            ]);
+        }
 
         if ($recipe->submitForApproval()) {
             return back()->with('success', 'Recipe submitted for approval!');
