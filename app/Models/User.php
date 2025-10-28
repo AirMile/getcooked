@@ -66,4 +66,13 @@ class User extends Authenticatable
         return $this->belongsToMany(Recipe::class, 'user_saved_recipes')
             ->withTimestamps();
     }
+
+    /**
+     * Toggle the user's verified status.
+     */
+    public function toggleVerified(): void
+    {
+        $this->is_verified = !$this->is_verified;
+        $this->save();
+    }
 }

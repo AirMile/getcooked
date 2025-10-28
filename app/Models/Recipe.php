@@ -164,4 +164,17 @@ class Recipe extends Model
             }
         )->shouldCache();
     }
+
+    /**
+     * Toggle recipe privacy status between private and approved.
+     */
+    public function togglePrivacy(): bool
+    {
+        if (!in_array($this->status, ['private', 'approved'])) {
+            throw new \InvalidArgumentException('Can only toggle between private and approved status');
+        }
+
+        $this->status = $this->status === 'private' ? 'approved' : 'private';
+        return $this->save();
+    }
 }

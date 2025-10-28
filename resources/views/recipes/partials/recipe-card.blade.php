@@ -20,7 +20,7 @@
             </span>
         </div>
 
-        @if(isset($recipe->user))
+        @if(isset($recipe->user) && $recipe->user)
             <p class="text-xs text-gray-500 mb-2 flex items-center gap-1">
                 <span>by {{ $recipe->user->name }}</span>
                 @if($recipe->user->is_verified)
