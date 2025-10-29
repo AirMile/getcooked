@@ -57,8 +57,8 @@ Hier houd ik bij wat ik heb gedaan tijdens het project.
     - Gebruikers worden permanent ontgrendeld na eerste goedgekeurd recept
     - Afgekeurde recepten tellen niet mee, gebruiker kan direct nieuw recept uploaden
     - Geverifieerde gebruikers omzeilen alle spam preventie beperkingen
-
-
+- **29 oktober**: Bug fix reject modal van pending recipes
+    - Admin kan recepten rejecten met specifieke reden
 ---
 
 ## Week 4 - 3 november 2025 (Deadline: 10 november)

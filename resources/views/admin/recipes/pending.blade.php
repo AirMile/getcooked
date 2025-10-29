@@ -5,7 +5,25 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12" x-data="{
+        showModal: false,
+        recipeId: null,
+        recipeTitle: '',
+        showRejectModal(id, title) {
+            this.recipeId = id;
+            this.recipeTitle = title;
+            this.showModal = true;
+        },
+        submitReject(event) {
+            if (!this.recipeId) {
+                console.error('Recipe ID not set');
+                return;
+            }
+            const form = event.target;
+            form.action = `/admin/recipes/${this.recipeId}/reject`;
+            form.submit();
+        }
+    }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             {{-- Statistics --}}
             <div class="grid grid-cols-4 gap-4 mb-6">
@@ -105,16 +123,15 @@
                 @endif
             </div>
         </div>
-    </div>
 
-    {{-- Reject Modal --}}
-    <div x-data="rejectModal()" x-show="showModal" x-cloak
+        {{-- Reject Modal --}}
+    <div x-show="showModal" x-cloak
         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg p-6 max-w-md w-full">
             <h3 class="text-lg font-bold mb-4">Reject Recipe</h3>
             <p class="mb-4">Rejecting: <strong x-text="recipeTitle"></strong></p>
 
-            <form :action="`/admin/recipes/${recipeId}/reject`" method="POST">
+            <form @submit.prevent="submitReject" method="POST">
                 @csrf
                 <div class="mb-4">
                     <label for="rejection_reason" class="block text-sm font-medium text-gray-700 mb-2">
@@ -132,24 +149,6 @@
             </form>
         </div>
     </div>
+    </div>
 
-    <script>
-    function rejectModal() {
-        return {
-            showModal: false,
-            recipeId: null,
-            recipeTitle: '',
-            showRejectModal(id, title) {
-                this.recipeId = id;
-                this.recipeTitle = title;
-                this.showModal = true;
-            }
-        };
-    }
-
-    window.showRejectModal = function(id, title) {
-        // This function is called from the inline @click
-        // Alpine.js will handle it through the x-data directive
-    };
-    </script>
 </x-app-layout>
