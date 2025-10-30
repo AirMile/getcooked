@@ -126,6 +126,19 @@
                         </ul>
                     </div>
 
+                    {{-- Preparation Steps --}}
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-2">Preparation Steps</h3>
+                        <ol class="space-y-3">
+                            @foreach($recipe->steps as $step)
+                                <li class="flex gap-3">
+                                    <span class="font-semibold text-gray-600">{{ $step->step_number }}.</span>
+                                    <span class="text-gray-700">{{ $step->description }}</span>
+                                </li>
+                            @endforeach
+                        </ol>
+                    </div>
+
                     {{-- Social features (only for approved recipes) --}}
                     @if($recipe->status === 'approved')
                         <div class="border-t pt-6">

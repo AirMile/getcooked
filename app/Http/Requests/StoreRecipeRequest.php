@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Recipe;
+use App\Models\RecipeStep;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File;
@@ -39,6 +40,22 @@ class StoreRecipeRequest extends FormRequest
             'ingredients.*.name' => 'required|string|max:255',
             'ingredients.*.amount' => 'required|numeric|min:0',
             'ingredients.*.unit' => 'required|string|max:50',
+            'steps' => 'required|array|min:' . RecipeStep::MIN_STEPS . '|max:' . RecipeStep::MAX_STEPS,
+            'steps.*.description' => 'required|string|max:' . RecipeStep::MAX_DESCRIPTION_LENGTH,
+        ];
+    }
+
+    /**
+     * Get custom validation messages.
+     */
+    public function messages(): array
+    {
+        return [
+            'steps.required' => 'At least one preparation step is required.',
+            'steps.min' => 'At least one preparation step is required.',
+            'steps.max' => 'You can add a maximum of ' . RecipeStep::MAX_STEPS . ' preparation steps.',
+            'steps.*.description.required' => 'Step description cannot be empty.',
+            'steps.*.description.max' => 'Step description cannot exceed ' . RecipeStep::MAX_DESCRIPTION_LENGTH . ' characters.',
         ];
     }
 }

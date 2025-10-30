@@ -1,3 +1,40 @@
+@php
+    use App\Models\RecipeStep;
+
+    // Constants for validation limits
+    $maxSteps = RecipeStep::MAX_STEPS;
+
+    // Prepare ingredients data for Alpine.js
+    $ingredientsData = old('ingredients');
+
+    if (!$ingredientsData && $recipe && $recipe->ingredients) {
+        $ingredientsData = $recipe->ingredients->map(function($i) {
+            return [
+                'name' => $i->name,
+                'amount' => $i->amount,
+                'unit' => $i->unit
+            ];
+        })->toArray();
+    }
+
+    if (!$ingredientsData) {
+        $ingredientsData = [['name' => '', 'amount' => '', 'unit' => '']];
+    }
+
+    // Prepare steps data for Alpine.js
+    $stepsData = old('steps');
+
+    if (!$stepsData && $recipe && $recipe->steps) {
+        $stepsData = $recipe->steps->map(function($s) {
+            return ['description' => $s->description];
+        })->toArray();
+    }
+
+    if (!$stepsData) {
+        $stepsData = [['description' => '']];
+    }
+@endphp
+
 <form action="{{ $action }}" method="POST" enctype="multipart/form-data" x-data="recipeForm()">
     @csrf
     @if($method !== 'POST')
@@ -123,6 +160,30 @@
         <button type="button" @click="addIngredient()" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 mt-2">Add Ingredient</button>
     </div>
 
+    {{-- Preparation Steps (dynamic with Alpine.js) --}}
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Preparation Steps</label>
+        <template x-for="(step, index) in steps" :key="index">
+            <div class="flex gap-2 mb-2">
+                <div class="flex items-center justify-center w-8 text-sm font-medium text-gray-600">
+                    <span x-text="index + 1"></span>.
+                </div>
+                <textarea :name="`steps[${index}][description]`" x-model="step.description" placeholder="Describe this step..." required rows="2"
+                    class="flex-1 rounded-md border-gray-300 shadow-sm"></textarea>
+                <button type="button" @click="removeStep(index)" class="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Remove</button>
+            </div>
+        </template>
+        <button type="button" @click="addStep()" :disabled="steps.length >= {{ $maxSteps }}" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 mt-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            Add Step <span x-show="steps.length >= {{ $maxSteps }}" class="text-xs">(Max {{ $maxSteps }})</span>
+        </button>
+        @error('steps')
+            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+        @enderror
+        @error('steps.*')
+            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+        @enderror
+    </div>
+
     {{-- Submit --}}
     <div class="flex justify-end gap-2">
         <a href="{{ route('recipes.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Cancel</a>
@@ -130,35 +191,28 @@
     </div>
 </form>
 
-@php
-    // Prepare ingredients data for Alpine.js
-    $ingredientsData = old('ingredients');
-
-    if (!$ingredientsData && $recipe && $recipe->ingredients) {
-        $ingredientsData = $recipe->ingredients->map(function($i) {
-            return [
-                'name' => $i->name,
-                'amount' => $i->amount,
-                'unit' => $i->unit
-            ];
-        })->toArray();
-    }
-
-    if (!$ingredientsData) {
-        $ingredientsData = [['name' => '', 'amount' => '', 'unit' => '']];
-    }
-@endphp
-
 <script>
 function recipeForm() {
     return {
         ingredients: @json($ingredientsData),
+        steps: @json($stepsData),
+        maxSteps: @json($maxSteps),
         addIngredient() {
             this.ingredients.push({ name: '', amount: '', unit: '' });
         },
         removeIngredient(index) {
             if (this.ingredients.length > 1) {
                 this.ingredients.splice(index, 1);
+            }
+        },
+        addStep() {
+            if (this.steps.length < this.maxSteps) {
+                this.steps.push({ description: '' });
+            }
+        },
+        removeStep(index) {
+            if (this.steps.length > 1) {
+                this.steps.splice(index, 1);
             }
         }
     }

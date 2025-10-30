@@ -1,6 +1,6 @@
 # Project Architecture - GetCooked
 
-Last updated: 2025-10-26
+Last updated: 2025-10-30
 
 ## Overview
 
@@ -26,6 +26,7 @@ getcooked/
 │       ├── User.php           # User model with roles and relationships
 │       ├── Recipe.php         # Recipe model with status workflow
 │       ├── Ingredient.php     # Ingredient model
+│       ├── RecipeStep.php     # Recipe preparation steps model
 │       └── Like.php           # Polymorphic like model
 ├── database/
 │   ├── factories/
@@ -67,6 +68,7 @@ erDiagram
     User ||--o{ Like : creates
     User }o--o{ Recipe : saves
     Recipe ||--o{ Ingredient : contains
+    Recipe ||--o{ RecipeStep : contains
     Recipe ||--o{ Like : receives
 
     User {
@@ -106,6 +108,14 @@ erDiagram
         timestamps
     }
 
+    RecipeStep {
+        id bigint PK
+        recipe_id bigint FK
+        step_number int
+        description text
+        timestamps
+    }
+
     Like {
         id bigint PK
         user_id bigint FK
@@ -132,12 +142,18 @@ erDiagram
 **Recipe Model:**
 - `belongsTo(User)` - Recipe belongs to one user (author)
 - `hasMany(Ingredient)` - Recipe has multiple ingredients (ordered)
+- `hasMany(RecipeStep)` - Recipe has multiple preparation steps (ordered by step_number)
 - `morphMany(Like)` - Recipe can receive likes/dislikes
 - `belongsToMany(User, 'user_saved_recipes')` - Recipe can be saved by multiple users
 
 **Ingredient Model:**
 - `belongsTo(Recipe)` - Ingredient belongs to one recipe
 - Cascade delete: ingredients are deleted when recipe is deleted
+
+**RecipeStep Model:**
+- `belongsTo(Recipe)` - Step belongs to one recipe
+- Touch behavior: updates recipe.updated_at when step is modified
+- Cascade delete: steps are deleted when recipe is force deleted
 
 **Like Model:**
 - `belongsTo(User)` - Like belongs to one user
@@ -149,6 +165,7 @@ erDiagram
 graph TD
     A[User] -->|creates| B[Recipe]
     B -->|has many| C[Ingredient]
+    B -->|has many| I[RecipeStep]
     A -->|creates| D[Like]
     D -->|can like| B
     A -->|saves| B
@@ -287,6 +304,13 @@ stateDiagram-v2
 - Ordered by `order` field for user-defined sequence
 - Cascade delete with recipe
 
+**app/Models/RecipeStep.php**
+- Preparation step model with recipe relationship
+- Ordered by `step_number` field (1-based numbering)
+- Touch behavior: updates parent recipe timestamp
+- Cascade delete on recipe force delete
+- Validation: min 1 step, max 25 steps per recipe
+
 **app/Models/Like.php**
 - Polymorphic like/dislike functionality
 - Boolean `is_like` (true = like, false = dislike)
@@ -346,24 +370,28 @@ stateDiagram-v2
 
 ## Testing Strategy
 
-### Unit Tests (14 tests)
+### Unit Tests (19 tests)
 - Model relationships verified
 - Status transition guards tested
 - Edge cases covered (division by zero, cascade deletes)
 - Scopes and accessors validated
+- RecipeStep relationships and ordering tested
 
-### Feature Tests (19 tests)
+### Feature Tests (27 tests)
 - Navigation rendering for different user roles
 - Dashboard browse functionality
 - Recipe card display and pagination
 - Empty state handling
 - Role-based access control
+- Recipe steps creation and validation
+- Recipe steps display and management
 
 ### Test Files
 **Unit Tests:**
 - `tests/Unit/Models/RecipeTest.php` - Recipe model tests
 - `tests/Unit/Models/IngredientTest.php` - Ingredient model tests
 - `tests/Unit/Models/LikeTest.php` - Like model tests
+- `tests/Unit/Models/RecipeStepTest.php` - RecipeStep model tests (5 tests)
 - `tests/Unit/Models/UserRecipeRelationshipsTest.php` - User relationships
 
 **Feature Tests:**
@@ -372,6 +400,7 @@ stateDiagram-v2
 - `tests/Feature/RecipeManagementTest.php` - Recipe CRUD tests
 - `tests/Feature/RecipePolicyTest.php` - Authorization tests
 - `tests/Feature/AdminRecipeManagementTest.php` - Admin workflow tests
+- `tests/Feature/RecipeStepsManagementTest.php` - Recipe steps functionality (8 tests)
 
 ## Next Steps
 

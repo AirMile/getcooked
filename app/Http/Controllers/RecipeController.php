@@ -92,6 +92,14 @@ class RecipeController extends Controller
             ]);
         }
 
+        // Create steps
+        foreach ($validated['steps'] as $index => $step) {
+            $recipe->steps()->create([
+                'step_number' => $index + 1,
+                'description' => $step['description'],
+            ]);
+        }
+
         return redirect()->route('recipes.show', $recipe)
             ->with('success', 'Recipe created successfully!');
     }
@@ -103,7 +111,7 @@ class RecipeController extends Controller
     {
         $this->authorize('view', $recipe);
 
-        $recipe->load(['user', 'ingredients', 'likes']);
+        $recipe->load(['user', 'ingredients', 'steps', 'likes']);
 
         $userLike = null;
         if (auth()->check()) {
@@ -126,7 +134,7 @@ class RecipeController extends Controller
     {
         $this->authorize('update', $recipe);
 
-        $recipe->load('ingredients');
+        $recipe->load(['ingredients', 'steps']);
 
         return view('recipes.edit', compact('recipe'));
     }
@@ -177,6 +185,15 @@ class RecipeController extends Controller
                 'amount' => $ingredient['amount'],
                 'unit' => $ingredient['unit'],
                 'order' => $index,
+            ]);
+        }
+
+        // Update steps (delete old, create new)
+        $recipe->steps()->delete();
+        foreach ($validated['steps'] as $index => $step) {
+            $recipe->steps()->create([
+                'step_number' => $index + 1,
+                'description' => $step['description'],
             ]);
         }
 

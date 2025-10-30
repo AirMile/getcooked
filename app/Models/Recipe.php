@@ -46,6 +46,11 @@ class Recipe extends Model
         return $this->hasMany(Ingredient::class)->orderBy('order');
     }
 
+    public function steps(): HasMany
+    {
+        return $this->hasMany(RecipeStep::class)->orderBy('step_number');
+    }
+
     public function likes(): MorphMany
     {
         return $this->morphMany(Like::class, 'likeable');

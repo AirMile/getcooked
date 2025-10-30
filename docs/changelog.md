@@ -59,6 +59,13 @@ Hier houd ik bij wat ik heb gedaan tijdens het project.
     - Geverifieerde gebruikers omzeilen alle spam preventie beperkingen
 - **29 oktober**: Bug fix reject modal van pending recipes
     - Admin kan recepten rejecten met specifieke reden
+- **30 oktober**: Bereidingsstappen functionaliteit voor recepten
+    - RecipeStep model met one-to-many relatie naar Recipe
+    - Dynamisch formulier met Alpine.js voor toevoegen/verwijderen van stappen
+    - Minimum 1 en maximum 25 stappen validatie
+    - Automatische genummering en herordening van stappen
+    - Stappen worden weergegeven op recept detail pagina in geordende lijst
+    - Database seeders aangepast met bereidingsstappen voor alle testdata
 ---
 
 ## Week 4 - 3 november 2025 (Deadline: 10 november)
