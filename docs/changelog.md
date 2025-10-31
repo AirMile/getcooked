@@ -66,11 +66,11 @@ Hier houd ik bij wat ik heb gedaan tijdens het project.
     - Automatische genummering en herordening van stappen
     - Stappen worden weergegeven op recept detail pagina in geordende lijst
     - Database seeders aangepast met bereidingsstappen voor alle testdata
+- **31 oktober**: UI/UX transformatie naar warm light theme
+    - Styleguide aangemaakt met Karamel & Toffee color palette en Lora/Lato typography systeem
+    - Tailwind config uitgebreid met alle styleguide design tokens (colors, fonts, spacing, shadows, transitions)
+    - Complete transformatie van dark naar light theme voor dashboard, recipe pages en navigation
+    - Dashboard header geoptimaliseerd: witte balk verwijderd voor minimalistisch design met betere visual hierarchy
+    - UI refinements: icon-only buttons, gecentreerde search bar, subtielere kleuren voor meer focus op content
 ---
 
-## Week 4 - 3 november 2025 (Deadline: 10 november)
-
-### Wat ik heb gedaan
-
-
----
