@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AdminRecipeController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\BrowseController;
+use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RecipeController;
 use Illuminate\Support\Facades\Route;
@@ -26,27 +28,21 @@ Route::get('/', function () {
 | Add new feature routes inside the middleware group.
 */
 
-Route::get('/dashboard', function () {
-    $recipes = \App\Models\Recipe::public()
-        ->with('user')
-        ->withCount([
-            'likes as likes_count',
-            'likes as likes_like_count' => fn($query) => $query->where('is_like', true),
-            'likes as likes_dislike_count' => fn($query) => $query->where('is_like', false),
-        ])
-        ->orderBy('created_at', 'desc')
-        ->paginate(15);
-
-    return view('dashboard', ['recipes' => $recipes]);
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Browse public approved recipes with search and filters
+Route::get('/browse', [BrowseController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('browse');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Recipe CRUD
-    Route::resource('recipes', RecipeController::class);
+    // Collection: user's own recipes and saved recipes with filters
+    Route::get('/collection', [CollectionController::class, 'index'])->name('collection');
+
+    // Recipe CRUD (except index, which is now 'collection')
+    Route::resource('recipes', RecipeController::class)->except(['index']);
 
     // Status transitions
     Route::post('recipes/{recipe}/submit', [RecipeController::class, 'submit'])

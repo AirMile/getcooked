@@ -1,20 +1,9 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Recipes') }}
-            </h2>
-            <a href="{{ route('recipes.create') }}" class="btn-primary">
-                Create Recipe
-            </a>
-        </div>
-    </x-slot>
-
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             {{-- My Recipes --}}
             <div class="mb-8">
-                <h3 class="text-2xl font-bold mb-4">My Recipes</h3>
+                <h1 class="font-primary text-3xl font-semibold text-gray-700 mb-8 px-4 sm:px-0">My Recipes</h1>
                 @if($myRecipes->isEmpty())
                     <p class="text-gray-600">You haven't created any recipes yet.</p>
                 @else
@@ -28,7 +17,7 @@
 
             {{-- Public Recipes --}}
             <div>
-                <h3 class="text-2xl font-bold mb-4">Public Recipes</h3>
+                <h2 class="font-primary text-3xl font-semibold text-gray-700 mb-8 px-4 sm:px-0">Public Recipes</h2>
                 @if($publicRecipes->isEmpty())
                     <p class="text-gray-600">No public recipes available yet.</p>
                 @else

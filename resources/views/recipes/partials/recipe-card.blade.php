@@ -9,7 +9,7 @@
 
     <div class="p-4">
         <div class="flex items-center justify-between mb-2">
-            <h4 class="font-bold text-lg">{{ $recipe->title }}</h4>
+            <h4 class="font-primary font-bold text-lg">{{ $recipe->title }}</h4>
             <span class="px-2 py-1 text-xs rounded-full
                 @if($recipe->status === 'private') bg-gray-200 text-gray-700
                 @elseif($recipe->status === 'pending') bg-yellow-200 text-yellow-700

@@ -8,7 +8,7 @@
             <div class="flex items-center gap-8">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
+                    <a href="{{ route('browse') }}">
                         <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
                     </a>
                 </div>
@@ -25,15 +25,15 @@
                         <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.index')">
                             {{ __('Users Management') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                            {{ __('Dashboard') }}
+                        <x-nav-link :href="route('browse')" :active="request()->routeIs('browse')">
+                            {{ __('Browse') }}
                         </x-nav-link>
                     @else
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                            {{ __('Public Recipes') }}
+                        <x-nav-link :href="route('browse')" :active="request()->routeIs('browse')">
+                            {{ __('Browse') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('recipes.index')" :active="request()->routeIs('recipes.index')">
-                            {{ __('My Recipes') }}
+                        <x-nav-link :href="route('collection')" :active="request()->routeIs('collection')">
+                            {{ __('Collection') }}
                         </x-nav-link>
                     @endif
                 </div>
@@ -111,15 +111,15 @@
                 <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.index')">
                     {{ __('Users Management') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                    {{ __('Dashboard') }}
+                <x-responsive-nav-link :href="route('browse')" :active="request()->routeIs('browse')">
+                    {{ __('Browse') }}
                 </x-responsive-nav-link>
             @else
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                    {{ __('Public Recipes') }}
+                <x-responsive-nav-link :href="route('browse')" :active="request()->routeIs('browse')">
+                    {{ __('Browse') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('recipes.index')" :active="request()->routeIs('recipes.index')">
-                    {{ __('My Recipes') }}
+                <x-responsive-nav-link :href="route('collection')" :active="request()->routeIs('collection')">
+                    {{ __('Collection') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('recipes.create')" :active="request()->routeIs('recipes.create')">
                     {{ __('Create Recipe') }}

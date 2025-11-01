@@ -72,5 +72,17 @@ Hier houd ik bij wat ik heb gedaan tijdens het project.
     - Complete transformatie van dark naar light theme voor dashboard, recipe pages en navigation
     - Dashboard header geoptimaliseerd: witte balk verwijderd voor minimalistisch design met betere visual hierarchy
     - UI refinements: icon-only buttons, gecentreerde search bar, subtielere kleuren voor meer focus op content
+- **1 november**: Zoek- en filtersysteem geïmplementeerd
+    - Routes hernoemd: /dashboard → /browse (publieke recepten), /recipes → /collection (eigen + opgeslagen recepten)
+    - Search voor titel, beschrijving en ingrediënten
+    - Browse pagina filters: Difficulty, Cook Time (quick/medium/long/very_long), Meal Type, Cuisine, Dietary Tags
+    - Collection pagina filters: Source (own public/own private/saved), Difficulty, Cook Time, Meal Type
+    - Query Scope Pattern: 6 herbruikbare scopes op Recipe model (search, byDifficulty, byCookTime, byMealType, byCuisine, byDietaryTags)
+    - SourceFilter invokable class voor complexe filtering van eigen en opgeslagen recepten
+    - Database indexes voor performance: composite index (status, created_at), individuele indexes (title, description, ingredient name)
+    - URL-gebaseerde filter persistentie (bookmarkable, shareable, browser back/forward support)
+    - Alpine.js filter panel met real-time updates en "Clear all" functionaliteit
+    - Dietary tags filter gebruikt AND-logica (recepten moeten alle geselecteerde tags hebben)
+    - Responsive filter UI: dropdown panel (desktop), toegankelijk via filter button in search bar
 ---
 
