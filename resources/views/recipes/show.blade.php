@@ -27,7 +27,7 @@
         </div>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12" x-data='{ pendingRecipe: @json($pendingRecipe ?? null) }'>
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             {{-- Author and actions --}}
             <div class="mb-6 flex items-center justify-between px-4 sm:px-0">
@@ -44,7 +44,8 @@
 
                 <div class="flex gap-2">
                     @can('submitForApproval', $recipe)
-                        <form action="{{ route('recipes.submit', $recipe) }}" method="POST">
+                        <form action="{{ route('recipes.submit', $recipe) }}" method="POST"
+                              @submit.prevent="if (pendingRecipe) { $dispatch('open-modal', 'pending-recipe-limit'); } else { $el.submit(); }">
                             @csrf
                             <button type="submit" class="px-4 py-2 bg-success text-white rounded-md hover:bg-green-700 transition-colors duration-base">
                                 Submit for Approval
@@ -189,5 +190,29 @@
                 </div>
             </div>
         </div>
+
+        {{-- Pending Recipe Limit Modal --}}
+        <x-modal name="pending-recipe-limit" :show="false">
+            <div class="p-6">
+                <h2 class="font-primary text-lg font-semibold text-gray-900 mb-4">Pending Recipe Limit Reached</h2>
+                <p class="text-gray-700 mb-4">You already have a pending recipe waiting for approval. You must wait for it to be reviewed before submitting another recipe.</p>
+
+                <div class="bg-gray-50 border border-gray-200 rounded-md p-4 mb-6">
+                    <p class="text-sm text-gray-600 mb-2">Your pending recipe:</p>
+                    <p class="font-semibold text-gray-900" x-text="pendingRecipe?.title || 'Unknown Recipe'"></p>
+                </div>
+
+                <div class="flex gap-2 justify-end">
+                    <template x-if="pendingRecipe">
+                        <a :href="'/recipes/' + pendingRecipe.id" class="px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600 transition-colors duration-base">
+                            View Pending Recipe
+                        </a>
+                    </template>
+                    <button @click="$dispatch('close-modal', 'pending-recipe-limit')" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors duration-base">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </x-modal>
     </div>
 </x-app-layout>

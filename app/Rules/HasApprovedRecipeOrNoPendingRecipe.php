@@ -41,24 +41,37 @@ class HasApprovedRecipeOrNoPendingRecipe implements ValidationRule, DataAwareRul
             return; // No user authenticated, let authorization handle it
         }
 
-        // Check if user has any approved recipes (unlocked status)
-        $hasApprovedRecipe = $user->recipes()
-            ->where('status', 'approved')
-            ->exists();
-
         // If user has approved recipe, they're unlocked - validation passes
-        if ($hasApprovedRecipe) {
+        if ($this->userHasApprovedRecipes($user)) {
             return;
         }
 
         // User has no approved recipes - check pending count
-        $pendingCount = $user->recipes()
-            ->where('status', 'pending')
-            ->count();
+        $pendingCount = $this->getUserPendingRecipesCount($user);
 
         // If user already has 1 or more pending recipes, fail validation
         if ($pendingCount >= 1) {
             $fail('You must wait for your first recipe to be approved before uploading more recipes.');
         }
+    }
+
+    /**
+     * Check if user has any approved recipes.
+     */
+    protected function userHasApprovedRecipes($user): bool
+    {
+        return $user->recipes()
+            ->where('status', 'approved')
+            ->exists();
+    }
+
+    /**
+     * Get the count of user's pending recipes.
+     */
+    protected function getUserPendingRecipesCount($user): int
+    {
+        return $user->recipes()
+            ->where('status', 'pending')
+            ->count();
     }
 }

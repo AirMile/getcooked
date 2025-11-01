@@ -1,6 +1,6 @@
 # Project Architecture - GetCooked
 
-Last updated: 2025-10-30
+Last updated: 2025-11-01
 
 ## Overview
 
@@ -288,6 +288,40 @@ stateDiagram-v2
   - `dislike_percentage`: rounds to 1 decimal (e.g., 33.3%)
 - Handles edge case: returns 0% when no likes exist
 
+### Spam Prevention System
+
+**Server-Side Validation:**
+- Custom validation rule: `HasApprovedRecipeOrNoPendingRecipe`
+- Non-verified users limited to 1 pending recipe
+- Users unlocked after first recipe approval
+- Rejected recipes don't count toward limit
+- Verified users bypass all spam prevention
+
+**Client-Side Prevention (Pending Recipe Limit Notification):**
+- Alpine.js intercepts form submission on recipe show page
+- Hard block: prevents HTTP request when spam limit reached
+- Modal displays pending recipe name with link to view it
+- Query optimization: only fetches pending recipe data for non-verified users
+- Backwards compatible: falls back to server validation if JavaScript disabled
+
+**Implementation:**
+```php
+// RecipeController@show - queries pending recipe for non-verified users
+$pendingRecipe = null;
+if (auth()->check() && !auth()->user()->is_verified) {
+    $pendingRecipe = auth()->user()->recipes()
+        ->where('status', 'pending')
+        ->first(['id', 'title']);
+}
+```
+
+**Modal Flow:**
+1. User with pending recipe clicks "Submit for Approval" on different recipe
+2. Alpine.js checks if `pendingRecipe` data exists
+3. If exists: dispatches modal event, prevents form submission
+4. If null: allows normal form submission
+5. Modal shows pending recipe name and "View Pending Recipe" link
+
 ## Key Files
 
 ### Models
@@ -377,7 +411,7 @@ stateDiagram-v2
 - Scopes and accessors validated
 - RecipeStep relationships and ordering tested
 
-### Feature Tests (27 tests)
+### Feature Tests (39 tests)
 - Navigation rendering for different user roles
 - Dashboard browse functionality
 - Recipe card display and pagination
@@ -385,6 +419,8 @@ stateDiagram-v2
 - Role-based access control
 - Recipe steps creation and validation
 - Recipe steps display and management
+- Spam prevention validation
+- Pending recipe limit notification
 
 ### Test Files
 **Unit Tests:**
@@ -401,6 +437,8 @@ stateDiagram-v2
 - `tests/Feature/RecipePolicyTest.php` - Authorization tests
 - `tests/Feature/AdminRecipeManagementTest.php` - Admin workflow tests
 - `tests/Feature/RecipeStepsManagementTest.php` - Recipe steps functionality (8 tests)
+- `tests/Feature/SpamPreventionTest.php` - Spam prevention validation (6 tests)
+- `tests/Feature/PendingRecipeLimitNotificationTest.php` - Client-side spam prevention notification (6 tests)
 
 ## Next Steps
 

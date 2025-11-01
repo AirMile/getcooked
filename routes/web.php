@@ -41,7 +41,12 @@ Route::middleware('auth')->group(function () {
     // Collection: user's own recipes and saved recipes with filters
     Route::get('/collection', [CollectionController::class, 'index'])->name('collection');
 
-    // Recipe CRUD (except index, which is now 'collection')
+    // Redirect /recipes to /collection for backwards compatibility
+    Route::get('/recipes', function () {
+        return redirect()->route('collection');
+    })->name('recipes.index');
+
+    // Recipe CRUD (except index, which is now handled above)
     Route::resource('recipes', RecipeController::class)->except(['index']);
 
     // Status transitions

@@ -84,5 +84,12 @@ Hier houd ik bij wat ik heb gedaan tijdens het project.
     - Alpine.js filter panel met real-time updates en "Clear all" functionaliteit
     - Dietary tags filter gebruikt AND-logica (recepten moeten alle geselecteerde tags hebben)
     - Responsive filter UI: dropdown panel (desktop), toegankelijk via filter button in search bar
+- **1 november (15:35)**: Spam preventie notificatie popup
+    - Client-side preventie: Alpine.js intercepteert recept indiening wanneer gebruiker al pending recept heeft
+    - Modal popup toont naam van pending recept met directe link naar dat recept
+    - "Hard block": voorkomt HTTP request wanneer spam limiet is bereikt (performance optimalisatie)
+    - Server-side validatie blijft intact als backup (backwards compatible, werkt ook als JavaScript uit staat)
+    - RecipeController query: haalt pending recept data op voor niet-geverifieerde gebruikers
+    - Gebruikt bestaande modal component structuur voor consistente UX
 ---
 

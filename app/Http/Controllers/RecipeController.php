@@ -13,6 +13,11 @@ use Illuminate\Support\Facades\Storage;
 class RecipeController extends Controller
 {
     /**
+     * Field name used for spam prevention validation.
+     */
+    private const SPAM_CHECK_FIELD = 'spam_check';
+
+    /**
      * Display listing of user's own recipes and public recipes.
      */
     public function index(Request $request)
@@ -124,7 +129,15 @@ class RecipeController extends Controller
             ? auth()->user()->savedRecipes()->where('recipe_id', $recipe->id)->exists()
             : false;
 
-        return view('recipes.show', compact('recipe', 'userLike', 'isSaved'));
+        // Get pending recipe for non-verified users (for client-side spam prevention)
+        $pendingRecipe = null;
+        if (auth()->check() && !auth()->user()->is_verified) {
+            $pendingRecipe = auth()->user()->recipes()
+                ->where('status', 'pending')
+                ->first(['id', 'title']);
+        }
+
+        return view('recipes.show', compact('recipe', 'userLike', 'isSaved', 'pendingRecipe'));
     }
 
     /**
@@ -228,9 +241,9 @@ class RecipeController extends Controller
 
         // Validate spam prevention (only for non-verified users)
         if (!$request->user()->is_verified) {
-            $request->merge(['spam_check' => 'check']); // Add dummy value for validation
+            $request->merge([self::SPAM_CHECK_FIELD => 'check']); // Add dummy value for validation
             $request->validate([
-                'spam_check' => [new HasApprovedRecipeOrNoPendingRecipe],
+                self::SPAM_CHECK_FIELD => [new HasApprovedRecipeOrNoPendingRecipe],
             ]);
         }
 
