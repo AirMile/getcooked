@@ -251,22 +251,94 @@
     </div>
 
     {{-- Submit --}}
-    <div class="flex justify-center gap-2 mt-12">
-        <a href="{{ route('recipes.index') }}" class="w-10 h-10 flex items-center justify-center bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-base" title="Cancel">
+    <div class="flex justify-end gap-2 mt-12">
+        <a href="{{ route('recipes.index') }}" @click="clearStorage()" class="w-10 h-10 flex items-center justify-center bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-base" title="Cancel">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
         </a>
-        <button type="submit" class="px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600 transition-colors duration-base">{{ $recipe ? 'Update' : 'Create' }} Recipe</button>
+        <button type="submit" @click="clearStorage()" class="px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600 transition-colors duration-base">{{ $recipe ? 'Update' : 'Create' }} Recipe</button>
     </div>
 </form>
 
 <script>
 function recipeForm() {
+    const storageKey = 'recipe_form_{{ $recipe ? "edit_" . $recipe->id : "create" }}';
+
     return {
         ingredients: @json($ingredientsData),
         steps: @json($stepsData),
         maxSteps: @json($maxSteps),
+
+        init() {
+            // Load from localStorage if available
+            const saved = localStorage.getItem(storageKey);
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    this.ingredients = data.ingredients || this.ingredients;
+                    this.steps = data.steps || this.steps;
+
+                    // Restore form field values
+                    if (data.formData) {
+                        Object.keys(data.formData).forEach(key => {
+                            const field = document.querySelector(`[name="${key}"]`);
+                            if (field && field.type !== 'file') {
+                                field.value = data.formData[key];
+                            }
+                        });
+
+                        // Restore checkboxes
+                        if (data.formData.dietary_tags) {
+                            data.formData.dietary_tags.forEach(tag => {
+                                const checkbox = document.querySelector(`[name="dietary_tags[]"][value="${tag}"]`);
+                                if (checkbox) checkbox.checked = true;
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error loading saved form data:', e);
+                }
+            }
+
+            // Save to localStorage on any input change
+            this.$watch('ingredients', () => this.saveToStorage());
+            this.$watch('steps', () => this.saveToStorage());
+
+            // Listen for input events on the form
+            this.$nextTick(() => {
+                const form = this.$el;
+                form.addEventListener('input', () => this.saveToStorage());
+                form.addEventListener('change', () => this.saveToStorage());
+            });
+        },
+
+        saveToStorage() {
+            const formData = {};
+            const form = this.$el;
+
+            // Get all form fields except file inputs
+            const inputs = form.querySelectorAll('input:not([type="file"]), textarea, select');
+            inputs.forEach(input => {
+                if (input.type === 'checkbox') {
+                    if (!formData[input.name]) formData[input.name] = [];
+                    if (input.checked) formData[input.name].push(input.value);
+                } else if (input.name && input.name !== '_token' && input.name !== '_method') {
+                    formData[input.name] = input.value;
+                }
+            });
+
+            localStorage.setItem(storageKey, JSON.stringify({
+                ingredients: this.ingredients,
+                steps: this.steps,
+                formData: formData
+            }));
+        },
+
+        clearStorage() {
+            localStorage.removeItem(storageKey);
+        },
+
         addIngredient() {
             this.ingredients.push({ name: '', amount: '', unit: '' });
         },

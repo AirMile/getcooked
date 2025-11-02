@@ -98,6 +98,7 @@ Hier houd ik bij wat ik heb gedaan tijdens het project.
     - Mark-as-read functionaliteit (enkel en bulk "Mark All as Read")
     - Unread indicator op ongelezen notificaties
     - Notificatie data bevat recipe_title (blijft beschikbaar na verwijdering van recept)
+    - Sla recipe data op in local storage bij Create & Edit van recipe
 
 ---
 
