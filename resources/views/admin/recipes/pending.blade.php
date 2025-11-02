@@ -1,10 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Pending Recipes') }}
-        </h2>
-    </x-slot>
-
     <div class="py-12" x-data="{
         showModal: false,
         recipeId: null,
@@ -25,39 +19,70 @@
         }
     }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <h1 class="font-primary text-3xl font-semibold text-gray-700 mb-8 px-4 sm:px-0">
+                {{ __('Pending Recipes') }}
+            </h1>
+
             {{-- Statistics --}}
-            <div class="grid grid-cols-4 gap-4 mb-6">
-                <div class="bg-yellow-100 rounded-lg p-4">
-                    <div class="text-2xl font-bold">{{ $stats['pending'] }}</div>
-                    <div class="text-sm text-gray-600">Pending</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg shadow-md p-5">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-3xl font-bold text-gray-900">{{ $stats['pending'] }}</div>
+                        <svg class="w-8 h-8 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="text-sm font-medium text-gray-600">Pending</div>
                 </div>
-                <div class="bg-green-100 rounded-lg p-4">
-                    <div class="text-2xl font-bold">{{ $stats['approved'] }}</div>
-                    <div class="text-sm text-gray-600">Approved</div>
+                <div class="bg-green-50 border border-green-200 rounded-lg shadow-md p-5">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-3xl font-bold text-gray-900">{{ $stats['approved'] }}</div>
+                        <svg class="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="text-sm font-medium text-gray-600">Approved</div>
                 </div>
-                <div class="bg-red-100 rounded-lg p-4">
-                    <div class="text-2xl font-bold">{{ $stats['rejected'] }}</div>
-                    <div class="text-sm text-gray-600">Rejected</div>
+                <div class="bg-red-50 border border-red-200 rounded-lg shadow-md p-5">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-3xl font-bold text-gray-900">{{ $stats['rejected'] }}</div>
+                        <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="text-sm font-medium text-gray-600">Rejected</div>
                 </div>
-                <div class="bg-blue-100 rounded-lg p-4">
-                    <div class="text-2xl font-bold">{{ $stats['total'] }}</div>
-                    <div class="text-sm text-gray-600">Total Recipes</div>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg shadow-md p-5">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-3xl font-bold text-gray-900">{{ $stats['total'] }}</div>
+                        <svg class="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="text-sm font-medium text-gray-600">Total Recipes</div>
                 </div>
             </div>
 
             {{-- Filters --}}
-            <div class="bg-white rounded-lg shadow-md p-4 mb-6">
-                <form method="GET" action="{{ route('admin.recipes.pending') }}" class="flex gap-4">
+            <div class="bg-white rounded-lg shadow-md border border-gray-200 p-5 mb-6">
+                <form method="GET" action="{{ route('admin.recipes.pending') }}" class="flex gap-3">
                     <input type="text" name="search" placeholder="Search recipes..."
                         value="{{ request('search') }}"
-                        class="flex-1 rounded-md border-gray-300">
-                    <button type="submit" class="btn-primary">Search</button>
-                    <a href="{{ route('admin.recipes.pending') }}" class="btn-secondary">Clear</a>
+                        class="flex-1 rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500">
+                    <button type="submit"
+                            class="inline-flex items-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-md transition-colors duration-base">
+                        Search
+                    </button>
+                    <a href="{{ route('admin.recipes.pending') }}"
+                       class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition-colors duration-base">
+                        Clear
+                    </a>
                 </form>
             </div>
 
             {{-- Pending Recipes List --}}
-            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
                 @if($pendingRecipes->isEmpty())
                     <div class="p-8 text-center text-gray-600">
                         No pending recipes at the moment.
@@ -74,16 +99,22 @@
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($pendingRecipes as $recipe)
-                                <tr>
+                                <tr class="hover:bg-gray-50 transition-colors duration-base">
                                     <td class="px-6 py-4">
-                                        <div class="flex items-center">
+                                        <div class="flex items-center gap-4">
                                             @if($recipe->photo_path)
                                                 <img src="{{ Storage::url($recipe->photo_path) }}" alt="{{ $recipe->title }}"
-                                                    class="h-16 w-16 rounded object-cover mr-4">
+                                                    class="h-20 w-20 rounded-lg object-cover flex-shrink-0 shadow-sm">
+                                            @else
+                                                <div class="h-20 w-20 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                                    <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                    </svg>
+                                                </div>
                                             @endif
-                                            <div>
-                                                <div class="font-medium">{{ $recipe->title }}</div>
-                                                <div class="text-sm text-gray-500">{{ Str::limit($recipe->description, 50) }}</div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="font-semibold text-gray-900 mb-1">{{ $recipe->title }}</div>
+                                                <div class="text-sm text-gray-500 line-clamp-2">{{ $recipe->description }}</div>
                                             </div>
                                         </div>
                                     </td>
@@ -96,18 +127,23 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex gap-2">
-                                            <a href="{{ route('recipes.show', $recipe) }}" class="btn-secondary text-sm">View</a>
+                                            <a href="{{ route('recipes.show', $recipe) }}"
+                                               class="inline-flex items-center px-3 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-md transition-colors duration-base">
+                                                View
+                                            </a>
 
                                             <form method="POST" action="{{ route('admin.recipes.approve', $recipe) }}" class="inline">
                                                 @csrf
-                                                <button type="submit" class="btn-primary text-sm"
-                                                    onclick="return confirm('Approve this recipe?')">
+                                                <button type="submit"
+                                                        class="inline-flex items-center px-3 py-2 bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-medium rounded-md transition-colors duration-base"
+                                                        onclick="return confirm('Approve this recipe?')">
                                                     Approve
                                                 </button>
                                             </form>
 
-                                            <button type="button" class="btn-danger text-sm"
-                                                @click="showRejectModal({{ $recipe->id }}, '{{ addslashes($recipe->title) }}')">
+                                            <button type="button"
+                                                    class="inline-flex items-center px-3 py-2 bg-error hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors duration-base"
+                                                    @click="showRejectModal({{ $recipe->id }}, '{{ addslashes($recipe->title) }}')">
                                                 Reject
                                             </button>
                                         </div>
@@ -126,27 +162,37 @@
 
         {{-- Reject Modal --}}
     <div x-show="showModal" x-cloak
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 class="text-lg font-bold mb-4">Reject Recipe</h3>
-            <p class="mb-4">Rejecting: <strong x-text="recipeTitle"></strong></p>
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full" @click.outside="showModal = false">
+            <div class="p-6">
+                <h3 class="font-primary text-2xl font-semibold text-gray-900 mb-4">Reject Recipe</h3>
+                <p class="text-gray-700 mb-6">
+                    Rejecting: <strong class="text-gray-900" x-text="recipeTitle"></strong>
+                </p>
 
-            <form @submit.prevent="submitReject" method="POST">
-                @csrf
-                <div class="mb-4">
-                    <label for="rejection_reason" class="block text-sm font-medium text-gray-700 mb-2">
-                        Rejection Reason
-                    </label>
-                    <textarea name="rejection_reason" id="rejection_reason" rows="4" required
-                        class="w-full rounded-md border-gray-300"
-                        placeholder="Explain why this recipe is being rejected..."></textarea>
-                </div>
+                <form @submit.prevent="submitReject" method="POST">
+                    @csrf
+                    <div class="mb-6">
+                        <label for="rejection_reason" class="block text-base font-medium text-gray-700 mb-2">
+                            Rejection Reason
+                        </label>
+                        <textarea name="rejection_reason" id="rejection_reason" rows="4" required
+                            class="w-full rounded-md border-gray-300 focus:border-error focus:ring-error"
+                            placeholder="Explain why this recipe is being rejected..."></textarea>
+                    </div>
 
-                <div class="flex justify-end gap-2">
-                    <button type="button" @click="showModal = false" class="btn-secondary">Cancel</button>
-                    <button type="submit" class="btn-danger">Reject Recipe</button>
-                </div>
-            </form>
+                    <div class="flex justify-end gap-3">
+                        <button type="button" @click="showModal = false"
+                                class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition-colors duration-base">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                class="inline-flex items-center px-4 py-2 bg-error hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors duration-base">
+                            Reject Recipe
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
     </div>

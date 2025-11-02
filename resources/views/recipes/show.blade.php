@@ -1,10 +1,67 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-primary font-semibold text-xl text-gray-900 leading-tight">
-                {{ $recipe->title }}
-            </h2>
-            <div class="flex gap-2">
+    <div class="py-12" x-data='{ pendingRecipe: @json($pendingRecipe ?? null) }'>
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+            {{-- Page heading --}}
+            <div class="mb-4 px-4 sm:px-0">
+                <h1 class="font-primary text-4xl font-semibold text-gray-700">
+                    {{ $recipe->title }}
+                </h1>
+            </div>
+
+            {{-- Author info --}}
+            @if($recipe->user_id !== auth()->id())
+                <div class="mb-6 pl-3">
+                    <span class="text-sm text-gray-500 flex items-center gap-1">
+                        By {{ $recipe->user->name }}
+                        @if($recipe->user->is_verified)
+                            <svg class="inline-block w-4 h-4 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                        @endif
+                    </span>
+                </div>
+            @else
+                <div class="mb-6"></div>
+            @endif
+
+            {{-- Back button and Actions --}}
+            <div class="mb-6 flex items-center justify-between px-4 sm:px-0">
+                <button onclick="
+                    @if(session('success'))
+                        window.history.length > 2 ? window.history.go(-2) : window.history.back()
+                    @else
+                        window.history.back()
+                    @endif
+                " class="p-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 rounded-md transition-colors duration-base" title="Back">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </button>
+
+                <div class="flex gap-2">
+                @can('submitForApproval', $recipe)
+                    <form action="{{ route('recipes.submit', $recipe) }}" method="POST"
+                          @submit.prevent="if (pendingRecipe) { $dispatch('open-modal', 'pending-recipe-limit'); } else { $el.submit(); }">
+                        @csrf
+                        <button type="submit" class="p-2 bg-secondary-500 text-white rounded-md hover:bg-secondary-600 transition-colors duration-base" title="Submit for Approval">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </button>
+                    </form>
+                @endcan
+
+                @can('withdraw', $recipe)
+                    <form action="{{ route('recipes.withdraw', $recipe) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="p-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors duration-base" title="Withdraw">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </button>
+                    </form>
+                @endcan
+
                 @can('update', $recipe)
                     <a href="{{ route('recipes.edit', $recipe) }}" class="p-2 bg-primary-500 text-white rounded-md hover:bg-primary-600 transition-colors duration-base" title="Edit">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -12,6 +69,7 @@
                         </svg>
                     </a>
                 @endcan
+
                 @can('delete', $recipe)
                     <form action="{{ route('recipes.destroy', $recipe) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this recipe?');">
                         @csrf
@@ -23,44 +81,6 @@
                         </button>
                     </form>
                 @endcan
-            </div>
-        </div>
-    </x-slot>
-
-    <div class="py-12" x-data='{ pendingRecipe: @json($pendingRecipe ?? null) }'>
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            {{-- Author and actions --}}
-            <div class="mb-6 flex items-center justify-between px-4 sm:px-0">
-                <div class="flex items-center gap-4">
-                    <span class="text-sm text-gray-500 flex items-center gap-1">
-                        By {{ $recipe->user->name }}
-                        @if($recipe->user->is_verified)
-                            <svg class="inline-block w-4 h-4 text-info" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
-                        @endif
-                    </span>
-                </div>
-
-                <div class="flex gap-2">
-                    @can('submitForApproval', $recipe)
-                        <form action="{{ route('recipes.submit', $recipe) }}" method="POST"
-                              @submit.prevent="if (pendingRecipe) { $dispatch('open-modal', 'pending-recipe-limit'); } else { $el.submit(); }">
-                            @csrf
-                            <button type="submit" class="px-4 py-2 bg-success text-white rounded-md hover:bg-green-700 transition-colors duration-base">
-                                Submit for Approval
-                            </button>
-                        </form>
-                    @endcan
-
-                    @can('withdraw', $recipe)
-                        <form action="{{ route('recipes.withdraw', $recipe) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="px-4 py-2 bg-warning text-white rounded-md hover:bg-yellow-600 transition-colors duration-base">
-                                Withdraw
-                            </button>
-                        </form>
-                    @endcan
                 </div>
             </div>
 

@@ -8,7 +8,7 @@
             @if($recipes->isNotEmpty())
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($recipes as $recipe)
-                        @include('recipes.partials.recipe-card', ['recipe' => $recipe])
+                        @include('recipes.partials.recipe-card', ['recipe' => $recipe, 'isCollectionView' => true])
                     @endforeach
                 </div>
             @else

@@ -1,13 +1,10 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('User Management') }}
-        </h2>
-    </x-slot>
-
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <h1 class="font-primary text-3xl font-semibold text-gray-700 mb-8 px-4 sm:px-0">
+                {{ __('User Management') }}
+            </h1>
+            <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
                 @if($users->isEmpty())
                     <div class="p-8 text-center text-gray-600">
                         No users with recipes found.
@@ -34,7 +31,7 @@
                                             <button
                                                 type="button"
                                                 @click="$el.blur(); verified = !verified; fetch('{{ route('admin.users.toggle-verified', $user) }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content } }).then(r => r.ok ? r.text().then(html => document.getElementById('verified-badge-{{ $user->id }}').innerHTML = html) : (verified = !verified))"
-                                                :class="verified ? 'bg-blue-600' : 'bg-gray-300'"
+                                                :class="verified ? 'bg-primary-500' : 'bg-gray-300'"
                                                 class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
                                                 role="switch"
                                                 :aria-checked="verified">

@@ -5,3 +5,22 @@
 [x-cloak] {
     display: none !important;
 }
+
+/* Fix browser autofill background color */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: #3E3830 !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Remove default focus rings on buttons, checkboxes, and links */
+button:focus,
+input[type="checkbox"]:focus,
+a:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}

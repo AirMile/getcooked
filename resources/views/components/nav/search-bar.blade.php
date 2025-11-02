@@ -19,10 +19,10 @@
 >
     <input
         type="text"
-        placeholder="Search recipes... (press Enter)"
+        placeholder="Search recipes..."
         x-model="searchTerm"
         @keydown.enter="performSearch()"
-        class="w-full px-4 py-2.5 pr-14 text-sm border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow duration-base"
+        class="w-full px-4 py-2.5 pr-14 text-base border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-shadow duration-base"
     >
     <button
         @click="filterPanelOpen = !filterPanelOpen"

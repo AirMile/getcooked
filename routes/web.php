@@ -85,9 +85,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('recipes/{recipe}/reject', [AdminRecipeController::class, 'reject'])
         ->name('recipes.reject');
 
-    // Public recipes moderation
-    Route::get('recipes/public', [AdminRecipeController::class, 'public'])
-        ->name('recipes.public');
+    // Recipe moderation
     Route::delete('recipes/{recipe}/moderate', [AdminRecipeController::class, 'moderate'])
         ->name('recipes.moderate');
 

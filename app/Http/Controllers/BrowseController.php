@@ -13,6 +13,7 @@ class BrowseController extends Controller
     public function index(BrowseRequest $request)
     {
         $query = Recipe::approved()
+            ->where('user_id', '!=', auth()->id()) // Exclude own recipes
             ->with('user')
             ->withCount([
                 'likes as likes_count',

@@ -42,54 +42,75 @@
     @endif
 
     {{-- Title --}}
-    <div class="mb-4">
-        <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+    <div class="mb-8">
+        <label for="title" class="block text-base font-medium text-gray-700">Title</label>
         <input type="text" name="title" id="title" value="{{ old('title', $recipe->title ?? '') }}" required
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+            class="mt-1 block w-full rounded-md border-gray-300 bg-white text-gray-700 shadow-sm focus:ring-0 focus:outline-none"
+            style="border-color: #D4CEC5; background-color: #FFFFFF; color: #3E3830; border-radius: 8px; border-width: 1px;"
+            onfocus="this.style.borderColor='#A67C52';"
+            onblur="this.style.borderColor='#D4CEC5';">
         @error('title')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
         @enderror
     </div>
 
     {{-- Description --}}
-    <div class="mb-4">
-        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+    <div class="mb-8">
+        <label for="description" class="block text-base font-medium text-gray-700">Description</label>
         <textarea name="description" id="description" rows="4" required
-            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ old('description', $recipe->description ?? '') }}</textarea>
+            class="mt-1 block w-full rounded-md border-gray-300 bg-white text-gray-700 shadow-sm focus:ring-0 focus:outline-none"
+            style="border-color: #D4CEC5; background-color: #FFFFFF; color: #3E3830; border-radius: 8px; border-width: 1px;"
+            onfocus="this.style.borderColor='#A67C52';"
+            onblur="this.style.borderColor='#D4CEC5';">{{ old('description', $recipe->description ?? '') }}</textarea>
         @error('description')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
         @enderror
     </div>
 
     {{-- Photo --}}
-    <div class="mb-4">
-        <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
+    <div class="mb-8" x-data="{ fileName: '' }">
+        <label class="block text-base font-medium text-gray-700 mb-2">Photo</label>
         @if($recipe && $recipe->photo_path)
             <div class="mb-2">
                 <img src="{{ Storage::url($recipe->photo_path) }}" alt="Current photo" class="h-32 w-auto rounded">
             </div>
         @endif
-        <input type="file" name="photo" id="photo" accept="image/*"
-            class="mt-1 block w-full">
+        <div class="flex items-center gap-3">
+            <input type="file" name="photo" id="photo" accept="image/*" class="hidden"
+                @change="fileName = $event.target.files[0]?.name || ''">
+            <label for="photo" class="inline-flex items-center px-4 py-2 border border-primary-500 text-primary-600 rounded-md hover:bg-primary-50 cursor-pointer transition-colors duration-base">
+                Choose File
+            </label>
+            <span class="text-sm text-gray-600" x-text="fileName || 'No file chosen'"></span>
+        </div>
         @error('photo')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
         @enderror
     </div>
 
+    {{-- Divider --}}
+    <div class="my-8"></div>
+
     {{-- Cook Time, Difficulty, Servings --}}
-    <div class="grid grid-cols-3 gap-4 mb-4">
+    <div class="grid grid-cols-3 gap-4 mb-8">
         <div>
-            <label for="cook_time" class="block text-sm font-medium text-gray-700">Cook Time (minutes)</label>
+            <label for="cook_time" class="block text-base font-medium text-gray-700">Cook Time (minutes)</label>
             <input type="number" name="cook_time" id="cook_time" value="{{ old('cook_time', $recipe->cook_time ?? '') }}" required min="1"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                class="mt-1 block w-full rounded-md border-gray-300 bg-white text-gray-700 shadow-sm focus:ring-0 focus:outline-none"
+                style="border-color: #D4CEC5; background-color: #FFFFFF; color: #3E3830; border-radius: 8px; border-width: 1px;"
+                onfocus="this.style.borderColor='#A67C52';"
+                onblur="this.style.borderColor='#D4CEC5';">
             @error('cook_time')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
         </div>
         <div>
-            <label for="difficulty" class="block text-sm font-medium text-gray-700">Difficulty</label>
+            <label for="difficulty" class="block text-base font-medium text-gray-700">Difficulty</label>
             <select name="difficulty" id="difficulty" required
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                class="mt-1 block w-full rounded-md border-gray-300 bg-white text-gray-700 shadow-sm focus:ring-0 focus:outline-none"
+                style="border-color: #D4CEC5; background-color: #FFFFFF; color: #3E3830; border-radius: 8px; border-width: 1px;"
+                onfocus="this.style.borderColor='#A67C52';"
+                onblur="this.style.borderColor='#D4CEC5';">
                 <option value="easy" {{ old('difficulty', $recipe->difficulty ?? '') === 'easy' ? 'selected' : '' }}>Easy</option>
                 <option value="medium" {{ old('difficulty', $recipe->difficulty ?? '') === 'medium' ? 'selected' : '' }}>Medium</option>
                 <option value="hard" {{ old('difficulty', $recipe->difficulty ?? '') === 'hard' ? 'selected' : '' }}>Hard</option>
@@ -99,9 +120,12 @@
             @enderror
         </div>
         <div>
-            <label for="servings" class="block text-sm font-medium text-gray-700">Servings</label>
+            <label for="servings" class="block text-base font-medium text-gray-700">Servings</label>
             <input type="number" name="servings" id="servings" value="{{ old('servings', $recipe->servings ?? 1) }}" required min="1"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                class="mt-1 block w-full rounded-md border-gray-300 bg-white text-gray-700 shadow-sm focus:ring-0 focus:outline-none"
+                style="border-color: #D4CEC5; background-color: #FFFFFF; color: #3E3830; border-radius: 8px; border-width: 1px;"
+                onfocus="this.style.borderColor='#A67C52';"
+                onblur="this.style.borderColor='#D4CEC5';">
             @error('servings')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
@@ -109,19 +133,25 @@
     </div>
 
     {{-- Cuisine Type & Category --}}
-    <div class="grid grid-cols-2 gap-4 mb-4">
+    <div class="grid grid-cols-2 gap-4 mb-8">
         <div>
-            <label for="cuisine_type" class="block text-sm font-medium text-gray-700">Cuisine Type</label>
+            <label for="cuisine_type" class="block text-base font-medium text-gray-700">Cuisine Type</label>
             <input type="text" name="cuisine_type" id="cuisine_type" value="{{ old('cuisine_type', $recipe->cuisine_type ?? '') }}"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="e.g., Italian, Mexican">
+                class="mt-1 block w-full rounded-md border-gray-300 bg-white text-gray-700 shadow-sm focus:ring-0 focus:outline-none" placeholder="e.g., Italian, Mexican"
+                style="border-color: #D4CEC5; background-color: #FFFFFF; color: #3E3830; border-radius: 8px; border-width: 1px;"
+                onfocus="this.style.borderColor='#A67C52';"
+                onblur="this.style.borderColor='#D4CEC5';">
             @error('cuisine_type')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
         </div>
         <div>
-            <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+            <label for="category" class="block text-base font-medium text-gray-700">Category</label>
             <input type="text" name="category" id="category" value="{{ old('category', $recipe->category ?? '') }}"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="e.g., Dessert, Main Course">
+                class="mt-1 block w-full rounded-md border-gray-300 bg-white text-gray-700 shadow-sm focus:ring-0 focus:outline-none" placeholder="e.g., Dessert, Main Course"
+                style="border-color: #D4CEC5; background-color: #FFFFFF; color: #3E3830; border-radius: 8px; border-width: 1px;"
+                onfocus="this.style.borderColor='#A67C52';"
+                onblur="this.style.borderColor='#D4CEC5';">
             @error('category')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
@@ -129,53 +159,82 @@
     </div>
 
     {{-- Dietary Tags (multi-select checkboxes) --}}
-    <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Dietary Tags</label>
+    <div class="mb-8">
+        <label class="block text-base font-medium text-gray-700 mb-2">Dietary Tags</label>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
             @foreach(['vegetarian', 'vegan', 'pescatarian', 'keto', 'paleo', 'gluten-free', 'dairy-free', 'nut-free', 'egg-free', 'soy-free', 'shellfish-free', 'fish-free'] as $tag)
                 <label class="flex items-center">
                     <input type="checkbox" name="dietary_tags[]" value="{{ $tag }}"
                         {{ in_array($tag, old('dietary_tags', $recipe->dietary_tags ?? [])) ? 'checked' : '' }}
-                        class="rounded border-gray-300">
+                        class="rounded border-gray-300 text-primary-500 focus:ring-0 focus:ring-offset-0">
                     <span class="ml-2 text-sm">{{ ucfirst($tag) }}</span>
                 </label>
             @endforeach
         </div>
     </div>
 
+    {{-- Divider --}}
+    <div class="my-8"></div>
+
     {{-- Ingredients (dynamic with Alpine.js) --}}
-    <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Ingredients</label>
+    <div class="mb-8">
+        <label class="block text-base font-medium text-gray-700 mb-2">Ingredients</label>
         <template x-for="(ingredient, index) in ingredients" :key="index">
             <div class="flex gap-2 mb-2">
                 <input type="text" :name="`ingredients[${index}][name]`" x-model="ingredient.name" placeholder="Ingredient name" required
-                    class="flex-1 rounded-md border-gray-300 shadow-sm">
+                    class="flex-1 rounded-md border-gray-300 bg-white text-gray-700 shadow-sm focus:ring-0 focus:outline-none"
+                    style="border-color: #D4CEC5; background-color: #FFFFFF; color: #3E3830; border-radius: 8px; border-width: 1px;"
+                    onfocus="this.style.borderColor='#A67C52';"
+                    onblur="this.style.borderColor='#D4CEC5';">
                 <input type="number" :name="`ingredients[${index}][amount]`" x-model="ingredient.amount" placeholder="Amount" required step="0.01" min="0"
-                    class="w-24 rounded-md border-gray-300 shadow-sm">
+                    class="w-24 rounded-md border-gray-300 bg-white text-gray-700 shadow-sm focus:ring-0 focus:outline-none"
+                    style="border-color: #D4CEC5; background-color: #FFFFFF; color: #3E3830; border-radius: 8px; border-width: 1px;"
+                    onfocus="this.style.borderColor='#A67C52';"
+                    onblur="this.style.borderColor='#D4CEC5';">
                 <input type="text" :name="`ingredients[${index}][unit]`" x-model="ingredient.unit" placeholder="Unit" required
-                    class="w-24 rounded-md border-gray-300 shadow-sm">
-                <button type="button" @click="removeIngredient(index)" class="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Remove</button>
+                    class="w-24 rounded-md border-gray-300 bg-white text-gray-700 shadow-sm focus:ring-0 focus:outline-none"
+                    style="border-color: #D4CEC5; background-color: #FFFFFF; color: #3E3830; border-radius: 8px; border-width: 1px;"
+                    onfocus="this.style.borderColor='#A67C52';"
+                    onblur="this.style.borderColor='#D4CEC5';">
+                <button type="button" @click="removeIngredient(index)" class="w-10 h-10 flex items-center justify-center bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-base self-center" title="Remove ingredient">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                </button>
             </div>
         </template>
-        <button type="button" @click="addIngredient()" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 mt-2">Add Ingredient</button>
+        <button type="button" @click="addIngredient()" class="px-4 py-2 bg-secondary-500 text-white rounded-md hover:bg-secondary-600 transition-colors duration-base">Add Ingredient</button>
     </div>
 
+    {{-- Divider --}}
+    <div class="my-8"></div>
+
     {{-- Preparation Steps (dynamic with Alpine.js) --}}
-    <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Preparation Steps</label>
+    <div class="mb-8">
+        <label class="block text-base font-medium text-gray-700 mb-2">Preparation Steps</label>
         <template x-for="(step, index) in steps" :key="index">
             <div class="flex gap-2 mb-2">
                 <div class="flex items-center justify-center w-8 text-sm font-medium text-gray-600">
                     <span x-text="index + 1"></span>.
                 </div>
                 <textarea :name="`steps[${index}][description]`" x-model="step.description" placeholder="Describe this step..." required rows="2"
-                    class="flex-1 rounded-md border-gray-300 shadow-sm"></textarea>
-                <button type="button" @click="removeStep(index)" class="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Remove</button>
+                    class="flex-1 rounded-md border-gray-300 bg-white text-gray-700 shadow-sm focus:ring-0 focus:outline-none"
+                    style="border-color: #D4CEC5; background-color: #FFFFFF; color: #3E3830; border-radius: 8px; border-width: 1px;"
+                    onfocus="this.style.borderColor='#A67C52';"
+                    onblur="this.style.borderColor='#D4CEC5';"></textarea>
+                <button type="button" @click="removeStep(index)" class="w-10 h-10 flex items-center justify-center bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-base self-center" title="Remove step">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                </button>
             </div>
         </template>
-        <button type="button" @click="addStep()" :disabled="steps.length >= {{ $maxSteps }}" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 mt-2 disabled:opacity-50 disabled:cursor-not-allowed">
-            Add Step <span x-show="steps.length >= {{ $maxSteps }}" class="text-xs">(Max {{ $maxSteps }})</span>
-        </button>
+        <div class="flex gap-2">
+            <div class="w-8"></div>
+            <button type="button" @click="addStep()" :disabled="steps.length >= {{ $maxSteps }}" class="px-4 py-2 bg-secondary-500 text-white rounded-md hover:bg-secondary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-base">
+                Add Step <span x-show="steps.length >= {{ $maxSteps }}" class="text-xs">(Max {{ $maxSteps }})</span>
+            </button>
+        </div>
         @error('steps')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
         @enderror
@@ -185,9 +244,13 @@
     </div>
 
     {{-- Submit --}}
-    <div class="flex justify-end gap-2">
-        <a href="{{ route('recipes.index') }}" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Cancel</a>
-        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">{{ $recipe ? 'Update' : 'Create' }} Recipe</button>
+    <div class="flex justify-center gap-2 mt-12">
+        <a href="{{ route('recipes.index') }}" class="w-10 h-10 flex items-center justify-center bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors duration-base" title="Cancel">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </a>
+        <button type="submit" class="px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600 transition-colors duration-base">{{ $recipe ? 'Update' : 'Create' }} Recipe</button>
     </div>
 </form>
 

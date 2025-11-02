@@ -3,24 +3,21 @@
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-200 shadow-sm">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
+        <div class="flex justify-between items-center h-20">
             <!-- Left: Logo + Nav Links -->
             <div class="flex items-center gap-8">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('browse') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                        <img src="{{ asset('images/getcooked_logo_nav.png') }}" alt="GetCooked" class="block h-8 w-auto">
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:flex">
+                <div class="hidden space-x-4 sm:-my-px sm:flex">
                     @if($isAdmin)
                         <x-nav-link :href="route('admin.recipes.pending')" :active="request()->routeIs('admin.recipes.pending')">
                             {{ __('Pending Recipes') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.recipes.public')" :active="request()->routeIs('admin.recipes.public')">
-                            {{ __('Public Recipes') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.index')">
                             {{ __('Users Management') }}
@@ -47,20 +44,27 @@
             <!-- Right: Create Recipe + Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:gap-3">
                 @unless($isAdmin)
-                    <a href="{{ route('recipes.create') }}" class="inline-flex items-center gap-2 px-3 py-1.5 border border-primary-500 text-primary-600 rounded-md hover:bg-primary-50 transition-colors duration-base" title="Create Recipe">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('recipes.create') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-primary-500 text-primary-600 rounded-md hover:bg-primary-50 transition-colors duration-base" title="Create Recipe">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
-                        <span class="text-sm font-medium">Create</span>
+                        <span class="text-base font-medium">Create</span>
                     </a>
                 @endunless
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:text-gray-900 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
+                        <button class="inline-flex items-center px-4 py-2.5 border border-transparent text-base leading-5 font-medium rounded-md text-gray-700 bg-white hover:text-gray-900 focus:outline-none transition ease-in-out duration-150">
+                            @if($isAdmin)
+                                <svg class="w-5 h-5 me-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <div>Admin</div>
+                            @else
+                                <div>{{ Auth::user()->name }}</div>
+                            @endif
 
                             <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <svg class="fill-current h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                 </svg>
                             </div>
@@ -104,9 +108,6 @@
             @if($isAdmin)
                 <x-responsive-nav-link :href="route('admin.recipes.pending')" :active="request()->routeIs('admin.recipes.pending')">
                     {{ __('Pending Recipes') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('admin.recipes.public')" :active="request()->routeIs('admin.recipes.public')">
-                    {{ __('Public Recipes') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.index')">
                     {{ __('Users Management') }}
