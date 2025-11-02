@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Recipe;
 use App\Models\User;
+use App\Notifications\RecipeApprovedNotification;
+use App\Notifications\RecipeRejectedNotification;
+use App\Notifications\RecipeDeletedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -51,6 +54,9 @@ class AdminRecipeController extends Controller
         $this->authorize('approve', $recipe);
 
         if ($recipe->approve()) {
+            // Send notification to recipe owner
+            $recipe->user->notify(new RecipeApprovedNotification($recipe));
+
             return back()->with('success', "Recipe '{$recipe->title}' approved successfully!");
         }
 
@@ -69,6 +75,9 @@ class AdminRecipeController extends Controller
         ]);
 
         if ($recipe->reject($validated['rejection_reason'])) {
+            // Send notification to recipe owner
+            $recipe->user->notify(new RecipeRejectedNotification($recipe, $validated['rejection_reason']));
+
             return back()->with('success', "Recipe '{$recipe->title}' rejected.");
         }
 
@@ -122,8 +131,14 @@ class AdminRecipeController extends Controller
             Storage::disk('public')->delete($recipe->photo_path);
         }
 
+        // Store recipe data before deletion for notification
         $title = $recipe->title;
+        $recipeOwner = $recipe->user;
+
         $recipe->delete();
+
+        // Send notification to recipe owner
+        $recipeOwner->notify(new RecipeDeletedNotification($title, $validated['reason']));
 
         return back()->with('success', "Recipe '{$title}' deleted. Reason: {$validated['reason']}");
     }

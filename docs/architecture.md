@@ -1,6 +1,6 @@
 # Project Architecture - GetCooked
 
-Last updated: 2025-11-01
+Last updated: 2025-11-02
 
 ## Overview
 
@@ -22,6 +22,10 @@ getcooked/
 ├── app/
 │   ├── Http/
 │   │   └── Controllers/       # HTTP controllers
+│   ├── Notifications/         # Notification classes
+│   │   ├── RecipeApprovedNotification.php
+│   │   ├── RecipeRejectedNotification.php
+│   │   └── RecipeDeletedNotification.php
 │   └── Models/
 │       ├── User.php           # User model with roles and relationships
 │       ├── Recipe.php         # Recipe model with status workflow
@@ -37,7 +41,8 @@ getcooked/
 │       ├── [timestamp]_create_recipes_table.php
 │       ├── [timestamp]_create_ingredients_table.php
 │       ├── [timestamp]_create_likes_table.php
-│       └── [timestamp]_create_user_saved_recipes_table.php
+│       ├── [timestamp]_create_user_saved_recipes_table.php
+│       └── [timestamp]_create_notifications_table.php
 ├── resources/
 │   └── views/
 │       ├── components/
@@ -66,6 +71,7 @@ getcooked/
 erDiagram
     User ||--o{ Recipe : owns
     User ||--o{ Like : creates
+    User ||--o{ Notification : receives
     User }o--o{ Recipe : saves
     Recipe ||--o{ Ingredient : contains
     Recipe ||--o{ RecipeStep : contains
@@ -130,6 +136,16 @@ erDiagram
         recipe_id bigint FK
         timestamps
     }
+
+    Notification {
+        id uuid PK
+        type string
+        notifiable_type string
+        notifiable_id bigint
+        data json
+        read_at timestamp
+        timestamps
+    }
 ```
 
 ### Key Relationships
@@ -137,6 +153,7 @@ erDiagram
 **User Model:**
 - `hasMany(Recipe)` - User owns multiple recipes
 - `hasMany(Like)` - User can like/dislike multiple items
+- `morphMany(Notification, 'notifiable')` - User receives notifications (via Notifiable trait)
 - `belongsToMany(Recipe, 'user_saved_recipes')` - User can save favorite recipes
 
 **Recipe Model:**
@@ -158,6 +175,11 @@ erDiagram
 **Like Model:**
 - `belongsTo(User)` - Like belongs to one user
 - `morphTo(likeable)` - Like can be attached to any model (currently Recipe)
+
+**Notification Model:**
+- `morphTo(notifiable)` - Notification belongs to notifiable entity (polymorphic, currently User)
+- Uses Laravel's built-in notifications table schema
+- Stores notification type (full class name) and JSON data payload
 
 ## Component Relationships
 
@@ -322,6 +344,56 @@ if (auth()->check() && !auth()->user()->is_verified) {
 4. If null: allows normal form submission
 5. Modal shows pending recipe name and "View Pending Recipe" link
 
+### Notification System
+
+**Pattern:** Laravel Notifications framework with database channel
+
+**Notification Types:**
+1. `RecipeApprovedNotification` - Sent when admin approves pending recipe
+2. `RecipeRejectedNotification` - Sent when admin rejects pending recipe (includes rejection reason)
+3. `RecipeDeletedNotification` - Sent when admin moderates/deletes approved recipe (includes deletion reason, persists recipe title)
+
+**Notification Dispatch:**
+- Direct dispatch within AdminRecipeController methods (approve, reject, moderate)
+- `$user->notify(new NotificationClass(...))` pattern
+- Notifications sent to recipe owner after admin action completes
+
+**Notification Data Structure (JSON):**
+```php
+[
+    'recipe_id' => int|null,           // null for deleted recipes
+    'recipe_title' => string,          // persisted even after deletion
+    'status' => 'approved'|'rejected'|'deleted',
+    'message' => string,               // human-readable notification message
+    'action_url' => string,            // context-aware navigation URL
+    'rejection_reason' => string,      // only for rejected notifications
+    'deletion_reason' => string,       // only for deleted notifications
+]
+```
+
+**Context-Aware Navigation:**
+- Approved recipe → redirects to recipe detail page (`recipes.show`)
+- Rejected recipe → redirects to recipe edit page (`recipes.edit`)
+- Deleted recipe → redirects to recipe create page (`recipes.create`)
+
+**User Interface:**
+- Navbar displays unread count badge (red badge, shows "9+" for 10+ notifications)
+- Notifications menu item in dropdown with count indicator
+- Dedicated notifications index page with chronological list (newest first)
+- Notification cards show icon (✅/❌/🗑️), message, timestamp, rejection/deletion reason
+- Unread notifications have blue left border and blue dot indicator
+- Read notifications have 75% opacity
+- "Mark All as Read" button for bulk updates
+
+**Performance:**
+- Unread count uses query builder `count()` (not collection count) for efficiency
+- Notifications paginated (20 per page)
+- Index on (notifiable_type, notifiable_id) for fast user notification queries
+
+**Security:**
+- Users can only view their own notifications (enforced via `$request->user()->notifications()`)
+- Notification data contains no sensitive information
+
 ## Key Files
 
 ### Models
@@ -354,6 +426,7 @@ if (auth()->check() && !auth()->user()->is_verified) {
 - Extended with recipe relationships
 - Role-based access (admin/user)
 - Manages owned recipes and saved favorites
+- Uses Notifiable trait for notifications (from Laravel Breeze)
 
 ### Migrations
 
@@ -411,7 +484,7 @@ if (auth()->check() && !auth()->user()->is_verified) {
 - Scopes and accessors validated
 - RecipeStep relationships and ordering tested
 
-### Feature Tests (39 tests)
+### Feature Tests (60 tests)
 - Navigation rendering for different user roles
 - Dashboard browse functionality
 - Recipe card display and pagination
@@ -439,6 +512,7 @@ if (auth()->check() && !auth()->user()->is_verified) {
 - `tests/Feature/RecipeStepsManagementTest.php` - Recipe steps functionality (8 tests)
 - `tests/Feature/SpamPreventionTest.php` - Spam prevention validation (6 tests)
 - `tests/Feature/PendingRecipeLimitNotificationTest.php` - Client-side spam prevention notification (6 tests)
+- `tests/Feature/RecipeNotificationTest.php` - Notification system (21 tests)
 
 ## Next Steps
 

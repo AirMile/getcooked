@@ -64,21 +64,22 @@
                 </div>
             </div>
 
-            {{-- Filters --}}
+            {{-- Search Bar --}}
             <div class="bg-white rounded-lg shadow-md border border-gray-200 p-5 mb-6">
-                <form method="GET" action="{{ route('admin.recipes.pending') }}" class="flex gap-3">
-                    <input type="text" name="search" placeholder="Search recipes..."
-                        value="{{ request('search') }}"
-                        class="flex-1 rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500">
-                    <button type="submit"
-                            class="inline-flex items-center px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-md transition-colors duration-base">
-                        Search
-                    </button>
-                    <a href="{{ route('admin.recipes.pending') }}"
-                       class="inline-flex items-center px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm font-medium rounded-md transition-colors duration-base">
+                <div class="relative" x-data="{ searchTerm: '{{ request('search') ?? '' }}' }">
+                    <input type="text"
+                        x-model="searchTerm"
+                        @keydown.enter="window.location.href = '{{ route('admin.recipes.pending') }}' + (searchTerm ? '?search=' + encodeURIComponent(searchTerm) : '')"
+                        placeholder="Search recipes..."
+                        class="w-full rounded-md border-gray-300 focus:border-transparent focus:ring-1 focus:ring-primary-500 focus:outline-none pr-20">
+                    <button
+                        x-show="searchTerm.length > 0"
+                        @click="searchTerm = ''; window.location.href = '{{ route('admin.recipes.pending') }}'"
+                        class="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors duration-base"
+                        title="Clear search">
                         Clear
-                    </a>
-                </form>
+                    </button>
+                </div>
             </div>
 
             {{-- Pending Recipes List --}}
@@ -128,23 +129,32 @@
                                     <td class="px-6 py-4">
                                         <div class="flex gap-2">
                                             <a href="{{ route('recipes.show', $recipe) }}"
-                                               class="inline-flex items-center px-3 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-md transition-colors duration-base">
-                                                View
+                                               class="inline-flex items-center justify-center w-10 h-10 bg-primary-500 hover:bg-primary-600 text-white rounded-md transition-colors duration-base"
+                                               title="View">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
                                             </a>
 
                                             <form method="POST" action="{{ route('admin.recipes.approve', $recipe) }}" class="inline">
                                                 @csrf
                                                 <button type="submit"
-                                                        class="inline-flex items-center px-3 py-2 bg-secondary-500 hover:bg-secondary-600 text-white text-sm font-medium rounded-md transition-colors duration-base"
-                                                        onclick="return confirm('Approve this recipe?')">
-                                                    Approve
+                                                        class="inline-flex items-center justify-center w-10 h-10 bg-secondary-500 hover:bg-secondary-600 text-white rounded-md transition-colors duration-base"
+                                                        title="Approve">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                    </svg>
                                                 </button>
                                             </form>
 
                                             <button type="button"
-                                                    class="inline-flex items-center px-3 py-2 bg-error hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors duration-base"
-                                                    @click="showRejectModal({{ $recipe->id }}, '{{ addslashes($recipe->title) }}')">
-                                                Reject
+                                                    class="inline-flex items-center justify-center w-10 h-10 bg-error hover:bg-red-700 text-white rounded-md transition-colors duration-base"
+                                                    @click="showRejectModal({{ $recipe->id }}, '{{ addslashes($recipe->title) }}')"
+                                                    title="Reject">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
                                             </button>
                                         </div>
                                     </td>

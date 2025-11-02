@@ -130,11 +130,19 @@ class RecipeController extends Controller
             : false;
 
         // Get pending recipe for non-verified users (for client-side spam prevention)
+        // Only show if user has NO approved recipes (not unlocked yet)
         $pendingRecipe = null;
         if (auth()->check() && !auth()->user()->is_verified) {
-            $pendingRecipe = auth()->user()->recipes()
-                ->where('status', 'pending')
-                ->first(['id', 'title']);
+            $hasApprovedRecipes = auth()->user()->recipes()
+                ->where('status', 'approved')
+                ->exists();
+
+            // Only block submission if user hasn't been unlocked yet (no approved recipes)
+            if (!$hasApprovedRecipes) {
+                $pendingRecipe = auth()->user()->recipes()
+                    ->where('status', 'pending')
+                    ->first(['id', 'title']);
+            }
         }
 
         return view('recipes.show', compact('recipe', 'userLike', 'isSaved', 'pendingRecipe'));
@@ -330,5 +338,25 @@ class RecipeController extends Controller
         $user->savedRecipes()->detach($recipe->id);
 
         return back()->with('success', 'Recipe removed from your library.');
+    }
+
+    /**
+     * Toggle recipe privacy (private/public).
+     */
+    public function togglePrivacy(Recipe $recipe)
+    {
+        $this->authorize('update', $recipe);
+
+        try {
+            $recipe->togglePrivacy();
+
+            $message = $recipe->is_private
+                ? 'Recipe is now private'
+                : 'Recipe is now public (pending approval)';
+
+            return back()->with('success', $message);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to toggle recipe privacy');
+        }
     }
 }

@@ -91,5 +91,24 @@ Hier houd ik bij wat ik heb gedaan tijdens het project.
     - Server-side validatie blijft intact als backup (backwards compatible, werkt ook als JavaScript uit staat)
     - RecipeController query: haalt pending recept data op voor niet-geverifieerde gebruikers
     - Gebruikt bestaande modal component structuur voor consistente UX
+
+---
+
+## Week 4 - 3 november 2025
+
+### Wat ik heb gedaan
+- **2 november**: Notificatiesysteem voor recept status updates
+    - Laravel Notifications framework geïmplementeerd met database channel
+    - Drie notificatie types: RecipeApproved, RecipeRejected, RecipeDeleted
+    - Admin acties triggeren automatisch notificaties naar recept auteurs
+    - Navbar toont unread count badge (rood bolletje met aantal, of "9+" bij meer dan 9)
+    - Notificaties pagina met chronologische lijst (nieuwste eerst)
+    - Context-aware navigatie knoppen: goedgekeurd→detail, afgekeurd→edit, verwijderd→nieuw
+    - Rejection en deletion reasons worden getoond in notificatie cards
+    - Mark-as-read functionaliteit (enkel en bulk "Mark All as Read")
+    - Unread indicator (blauwe stip) op ongelezen notificaties
+    - Notificatie data bevat recipe_title (blijft beschikbaar na verwijdering van recept)
+    - 21 geautomatiseerde tests voor notificatie dispatch, UI rendering en edge cases
+
 ---
 

@@ -87,7 +87,7 @@
             {{-- Photo --}}
             @if($recipe->photo_path)
                 <div class="mb-6">
-                    <img src="{{ Storage::url($recipe->photo_path) }}" alt="{{ $recipe->title }}" class="w-full rounded-lg shadow-lg">
+                    <img src="{{ Storage::url($recipe->photo_path) }}" alt="{{ $recipe->title }}" class="w-full rounded-lg shadow-lg border border-gray-200">
                 </div>
             @endif
 
@@ -156,8 +156,8 @@
                         </ol>
                     </div>
 
-                    {{-- Social features (only for approved recipes) --}}
-                    @if($recipe->status === 'approved')
+                    {{-- Social features (only for approved recipes from other users) --}}
+                    @if($recipe->status === 'approved' && $recipe->user_id !== auth()->id())
                         <div class="border-t border-gray-200 pt-6">
                             <div class="flex items-center justify-between">
                                 {{-- Like/Dislike --}}

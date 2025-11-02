@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminRecipeController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\CollectionController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RecipeController;
 use Illuminate\Support\Facades\Route;
@@ -54,6 +55,8 @@ Route::middleware('auth')->group(function () {
         ->name('recipes.submit');
     Route::post('recipes/{recipe}/withdraw', [RecipeController::class, 'withdraw'])
         ->name('recipes.withdraw');
+    Route::post('recipes/{recipe}/toggle-privacy', [RecipeController::class, 'togglePrivacy'])
+        ->name('recipes.toggle-privacy');
 
     // Social features (with rate limiting)
     Route::middleware('throttle:recipe-interactions')->group(function () {
@@ -66,6 +69,16 @@ Route::middleware('auth')->group(function () {
         Route::delete('recipes/{recipe}/unsave', [RecipeController::class, 'unsave'])
             ->name('recipes.unsave');
     });
+
+    // Notifications
+    Route::get('notifications', [NotificationController::class, 'index'])
+        ->name('notifications.index');
+    Route::patch('notifications/{id}/read', [NotificationController::class, 'markAsRead'])
+        ->name('notifications.read');
+    Route::patch('notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])
+        ->name('notifications.mark-all-read');
+    Route::delete('notifications/delete-all', [NotificationController::class, 'deleteAll'])
+        ->name('notifications.delete-all');
 });
 
 /*

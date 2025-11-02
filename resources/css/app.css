@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Reserve space for scrollbar to prevent layout shift */
+html {
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
+}
+
 [x-cloak] {
     display: none !important;
 }
@@ -22,5 +28,40 @@ input[type="checkbox"]:focus,
 a:focus {
     outline: none !important;
     box-shadow: none !important;
-    border: none !important;
+}
+
+/* Search bar animation - Luxury Fade */
+@keyframes luxury-fade {
+    0% {
+        opacity: 0;
+        transform: translateX(-25px);
+        filter: blur(4px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+        filter: blur(0);
+    }
+}
+
+.animate-fade-in-down {
+    animation: luxury-fade 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Search bar fade-out animation */
+@keyframes luxury-fade-out {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+        filter: blur(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-25px);
+        filter: blur(4px);
+    }
+}
+
+.animate-fade-out {
+    animation: luxury-fade-out 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
