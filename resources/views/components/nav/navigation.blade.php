@@ -1,7 +1,7 @@
 @props(['isAdmin' => false])
 
 @php
-    $unreadCount = Auth::user()->unreadNotifications()->count();
+    $unreadCount = Auth::user()->getCachedUnreadNotificationsCount();
 @endphp
 
 <nav x-data="{

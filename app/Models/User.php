@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 
 class User extends Authenticatable
 {
@@ -74,5 +75,18 @@ class User extends Authenticatable
     {
         $this->is_verified = !$this->is_verified;
         $this->save();
+    }
+
+    /**
+     * Get cached count of unread notifications.
+     * Cache expires after 5 minutes to balance performance and freshness.
+     */
+    public function getCachedUnreadNotificationsCount(): int
+    {
+        return Cache::remember(
+            "user_{$this->id}_unread_notifications_count",
+            now()->addMinutes(5),
+            fn() => $this->unreadNotifications()->count()
+        );
     }
 }

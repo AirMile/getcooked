@@ -1,5 +1,26 @@
 <x-app-layout>
-    <div class="py-12" x-data='{ pendingRecipe: @json($pendingRecipe ?? null) }'>
+    <div class="py-12" x-data='{
+        pendingRecipe: @json($pendingRecipe ?? null),
+        originalServings: {{ $recipe->servings }},
+        servings: {{ $recipe->servings }},
+        ingredients: @json($recipe->ingredients->map(fn($i) => [
+            "name" => $i->name,
+            "amount" => floatval($i->amount),
+            "unit" => $i->unit
+        ])),
+        get ratio() {
+            return this.servings / this.originalServings;
+        },
+        getScaledAmount(originalAmount) {
+            return Math.round(originalAmount * this.ratio * 100) / 100;
+        },
+        incrementServings() {
+            if (this.servings < 99) this.servings++;
+        },
+        decrementServings() {
+            if (this.servings > 1) this.servings--;
+        }
+    }'>
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             {{-- Page heading --}}
             <div class="mb-4 px-4 sm:px-0">
@@ -100,7 +121,7 @@
                     </div>
 
                     {{-- Recipe info --}}
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="flex items-start gap-6 mb-6">
                         <div>
                             <span class="text-sm text-gray-500">Cook Time</span>
                             <p class="font-semibold text-gray-900">{{ $recipe->cook_time }} min</p>
@@ -108,10 +129,6 @@
                         <div>
                             <span class="text-sm text-gray-500">Difficulty</span>
                             <p class="font-semibold text-gray-900">{{ ucfirst($recipe->difficulty) }}</p>
-                        </div>
-                        <div>
-                            <span class="text-sm text-gray-500">Servings</span>
-                            <p class="font-semibold text-gray-900">{{ $recipe->servings }}</p>
                         </div>
                         @if($recipe->cuisine_type)
                             <div>
@@ -133,13 +150,43 @@
                         </div>
                     @endif
 
+                    {{-- Servings Adjuster --}}
+                    <div class="mb-1 pb-6 border-t border-gray-200 pt-6">
+                        <div class="flex items-center gap-4">
+                            <h3 class="font-primary text-lg font-semibold text-gray-900">Servings</h3>
+                            <div class="flex items-center gap-2">
+                                <button @click="decrementServings()"
+                                        :disabled="servings <= 1"
+                                        :class="servings <= 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'"
+                                        class="w-6 h-6 flex items-center justify-center border border-gray-300 bg-white text-gray-700 rounded transition-colors duration-base">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                    </svg>
+                                </button>
+                                <span x-text="servings" class="font-semibold text-gray-900 min-w-[2rem] text-center px-3 py-1 bg-gray-100 rounded"></span>
+                                <button @click="incrementServings()"
+                                        :disabled="servings >= 99"
+                                        :class="servings >= 99 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'"
+                                        class="w-6 h-6 flex items-center justify-center border border-gray-300 bg-white text-gray-700 rounded transition-colors duration-base">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     {{-- Ingredients --}}
                     <div class="mb-6">
                         <h3 class="font-primary text-lg font-semibold text-gray-900 mb-2">Ingredients</h3>
                         <ul class="list-disc list-inside space-y-1 text-gray-700">
-                            @foreach($recipe->ingredients as $ingredient)
-                                <li>{{ $ingredient->amount }} {{ $ingredient->unit }} {{ $ingredient->name }}</li>
-                            @endforeach
+                            <template x-for="ingredient in ingredients" :key="ingredient.name">
+                                <li>
+                                    <span x-text="getScaledAmount(ingredient.amount)"></span>
+                                    <span x-text="ingredient.unit"></span>
+                                    <span x-text="ingredient.name"></span>
+                                </li>
+                            </template>
                         </ul>
                     </div>
 
@@ -164,8 +211,8 @@
                                 <div class="flex items-center gap-3">
                                     <form action="{{ route('recipes.like', $recipe) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" class="p-2 rounded-md transition-colors duration-base {{ $userLike && $userLike->is_like ? 'bg-secondary-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}" title="Like">
-                                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                        <button type="submit" class="w-10 h-10 flex items-center justify-center rounded-md transition-colors duration-base {{ $userLike && $userLike->is_like ? 'bg-secondary-500 text-white hover:bg-secondary-600' : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400' }}" title="Like">
+                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                                 <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"></path>
                                             </svg>
                                         </button>
@@ -173,8 +220,8 @@
 
                                     <form action="{{ route('recipes.dislike', $recipe) }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" class="p-2 rounded-md transition-colors duration-base {{ $userLike && !$userLike->is_like ? 'bg-error text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}" title="Dislike">
-                                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                        <button type="submit" class="w-10 h-10 flex items-center justify-center rounded-md transition-colors duration-base {{ $userLike && !$userLike->is_like ? 'bg-error text-white hover:bg-red-700' : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400' }}" title="Dislike">
+                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                                 <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.105-1.79l-.05-.025A4 4 0 0011.055 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z"></path>
                                             </svg>
                                         </button>
@@ -187,18 +234,18 @@
                                         <form action="{{ route('recipes.unsave', $recipe) }}" method="POST">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="p-2 bg-secondary-500 text-white rounded-md hover:bg-secondary-600 transition-colors duration-base" title="Remove from Library">
-                                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"></path>
+                                            <button type="submit" class="w-10 h-10 flex items-center justify-center bg-primary-500 text-white rounded-md hover:bg-primary-600 transition-colors duration-base" title="Remove from Library">
+                                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path fill-rule="evenodd" d="M6.32 2.577a49.255 49.255 0 0111.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 01-1.085.67L12 18.089l-7.165 3.583A.75.75 0 013.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93z" clip-rule="evenodd" />
                                                 </svg>
                                             </button>
                                         </form>
                                     @else
                                         <form action="{{ route('recipes.save', $recipe) }}" method="POST">
                                             @csrf
-                                            <button type="submit" class="p-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md transition-colors duration-base" title="Save to Library">
-                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 20 20">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 19V5z"></path>
+                                            <button type="submit" class="w-10 h-10 flex items-center justify-center border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 rounded-md transition-colors duration-base" title="Save to Library">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
                                                 </svg>
                                             </button>
                                         </form>

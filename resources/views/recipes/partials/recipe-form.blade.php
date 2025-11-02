@@ -159,17 +159,24 @@
     </div>
 
     {{-- Dietary Tags (multi-select checkboxes) --}}
-    <div class="mb-8">
-        <label class="block text-base font-medium text-gray-700 mb-2">Dietary Tags</label>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-            @foreach(['vegetarian', 'vegan', 'pescatarian', 'keto', 'paleo', 'gluten-free', 'dairy-free', 'nut-free', 'egg-free', 'soy-free', 'shellfish-free', 'fish-free'] as $tag)
-                <label class="flex items-center">
-                    <input type="checkbox" name="dietary_tags[]" value="{{ $tag }}"
-                        {{ in_array($tag, old('dietary_tags', $recipe->dietary_tags ?? [])) ? 'checked' : '' }}
-                        class="rounded border-gray-300 text-primary-500 focus:ring-0 focus:ring-offset-0">
-                    <span class="ml-2 text-sm">{{ ucfirst($tag) }}</span>
-                </label>
-            @endforeach
+    <div class="mb-8" x-data="{ showDietaryTags: {{ !empty(old('dietary_tags', $recipe->dietary_tags ?? [])) ? 'true' : 'false' }} }">
+        <button type="button" @click="showDietaryTags = !showDietaryTags" class="flex items-center gap-2 text-left mb-2">
+            <label class="block text-base font-medium text-gray-700">Dietary Tags (Optional)</label>
+            <svg class="w-5 h-5 text-gray-500 transition-transform duration-200" :class="{ 'rotate-180': showDietaryTags }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <div x-show="showDietaryTags" x-collapse>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                @foreach(['vegetarian', 'vegan', 'pescatarian', 'keto', 'paleo', 'gluten-free', 'dairy-free', 'nut-free', 'egg-free', 'soy-free', 'shellfish-free', 'fish-free'] as $tag)
+                    <label class="flex items-center">
+                        <input type="checkbox" name="dietary_tags[]" value="{{ $tag }}"
+                            {{ in_array($tag, old('dietary_tags', $recipe->dietary_tags ?? [])) ? 'checked' : '' }}
+                            class="rounded border-gray-300 text-primary-500 focus:ring-0 focus:ring-offset-0">
+                        <span class="ml-2 text-sm">{{ ucfirst($tag) }}</span>
+                    </label>
+                @endforeach
+            </div>
         </div>
     </div>
 

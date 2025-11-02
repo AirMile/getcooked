@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class NotificationController extends Controller
 {
@@ -29,6 +30,9 @@ class NotificationController extends Controller
 
         $notification->markAsRead();
 
+        // Clear cached unread count
+        Cache::forget("user_{$request->user()->id}_unread_notifications_count");
+
         // Redirect to action URL from notification data
         if (isset($notification->data['action_url'])) {
             return redirect($notification->data['action_url']);
@@ -46,6 +50,9 @@ class NotificationController extends Controller
             ->unreadNotifications
             ->markAsRead();
 
+        // Clear cached unread count
+        Cache::forget("user_{$request->user()->id}_unread_notifications_count");
+
         return back()->with('success', 'All notifications marked as read.');
     }
 
@@ -57,6 +64,9 @@ class NotificationController extends Controller
         $request->user()
             ->notifications()
             ->delete();
+
+        // Clear cached unread count
+        Cache::forget("user_{$request->user()->id}_unread_notifications_count");
 
         return back()->with('success', 'All notifications deleted.');
     }
